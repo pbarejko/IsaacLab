@@ -967,11 +967,11 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.add_to_episodes"><code class="docutils literal notranslate"><span class="pre">RecorderManager.add_to_episodes()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.set_success_to_episodes"><code class="docutils literal notranslate"><span class="pre">RecorderManager.set_success_to_episodes()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_pre_step"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_pre_step()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_post_step"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_post_step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.device"><code class="docutils literal notranslate"><span class="pre">RecorderManager.device</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.find_terms"><code class="docutils literal notranslate"><span class="pre">RecorderManager.find_terms()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.get_active_iterable_terms"><code class="docutils literal notranslate"><span class="pre">RecorderManager.get_active_iterable_terms()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.num_envs"><code class="docutils literal notranslate"><span class="pre">RecorderManager.num_envs</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_post_step"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_post_step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_post_physics_decimation_step"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_post_physics_decimation_step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_pre_reset"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_pre_reset()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_post_reset"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_post_reset()</span></code></a></li>
@@ -3868,14 +3868,14 @@ in the <a class="reference internal" href="#isaaclab.managers.SceneEntityCfg" ti
 <tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.managers.RecorderManager.record_pre_step" title="isaaclab.managers.RecorderManager.record_pre_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">record_pre_step</span></code></a>()</p></td>
 <td><p>Trigger recorder terms for pre-step functions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#isaaclab.managers.RecorderManager.record_post_step" title="isaaclab.managers.RecorderManager.record_post_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">record_post_step</span></code></a>()</p></td>
-<td><p>Trigger recorder terms for post-step functions.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.managers.RecorderManager.find_terms" title="isaaclab.managers.RecorderManager.find_terms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_terms</span></code></a>(name_keys)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isaaclab.managers.RecorderManager.find_terms" title="isaaclab.managers.RecorderManager.find_terms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_terms</span></code></a>(name_keys)</p></td>
 <td><p>Find terms in the manager based on the names.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#isaaclab.managers.RecorderManager.get_active_iterable_terms" title="isaaclab.managers.RecorderManager.get_active_iterable_terms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_active_iterable_terms</span></code></a>(env_idx)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.managers.RecorderManager.get_active_iterable_terms" title="isaaclab.managers.RecorderManager.get_active_iterable_terms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_active_iterable_terms</span></code></a>(env_idx)</p></td>
 <td><p>Returns the active terms as iterable sequence of tuples.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isaaclab.managers.RecorderManager.record_post_step" title="isaaclab.managers.RecorderManager.record_post_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">record_post_step</span></code></a>()</p></td>
+<td><p>Trigger recorder terms for post-step functions.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.managers.RecorderManager.record_post_physics_decimation_step" title="isaaclab.managers.RecorderManager.record_post_physics_decimation_step"><code class="xref py py-obj docutils literal notranslate"><span class="pre">record_post_physics_decimation_step</span></code></a>()</p></td>
 <td><p>Trigger recorder terms for post-physics step functions in the decimation loop.</p></td>
@@ -4034,12 +4034,6 @@ The shape of a tensor in the value is (env_ids, …).</p></li>
 <dd><p>Trigger recorder terms for pre-step functions.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="isaaclab.managers.RecorderManager.record_post_step">
-<span class="sig-name descname"><span class="pre">record_post_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/isaaclab/managers/recorder_manager.html#RecorderManager.record_post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isaaclab.managers.RecorderManager.record_post_step" title="Link to this definition">#</a></dt>
-<dd><p>Trigger recorder terms for post-step functions.</p>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="isaaclab.managers.RecorderManager.device">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">device</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></em><a class="headerlink" href="#isaaclab.managers.RecorderManager.device" title="Link to this definition">#</a></dt>
@@ -4081,6 +4075,12 @@ information on the name matching.</p>
 <dt class="sig sig-object py" id="isaaclab.managers.RecorderManager.num_envs">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_envs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></em><a class="headerlink" href="#isaaclab.managers.RecorderManager.num_envs" title="Link to this definition">#</a></dt>
 <dd><p>Number of environments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="isaaclab.managers.RecorderManager.record_post_step">
+<span class="sig-name descname"><span class="pre">record_post_step</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/isaaclab/managers/recorder_manager.html#RecorderManager.record_post_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isaaclab.managers.RecorderManager.record_post_step" title="Link to this definition">#</a></dt>
+<dd><p>Trigger recorder terms for post-step functions.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -4476,11 +4476,11 @@ closes the recorder terms.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.add_to_episodes"><code class="docutils literal notranslate"><span class="pre">RecorderManager.add_to_episodes()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.set_success_to_episodes"><code class="docutils literal notranslate"><span class="pre">RecorderManager.set_success_to_episodes()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_pre_step"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_pre_step()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_post_step"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_post_step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.device"><code class="docutils literal notranslate"><span class="pre">RecorderManager.device</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.find_terms"><code class="docutils literal notranslate"><span class="pre">RecorderManager.find_terms()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.get_active_iterable_terms"><code class="docutils literal notranslate"><span class="pre">RecorderManager.get_active_iterable_terms()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.num_envs"><code class="docutils literal notranslate"><span class="pre">RecorderManager.num_envs</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_post_step"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_post_step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_post_physics_decimation_step"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_post_physics_decimation_step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_pre_reset"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_pre_reset()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.managers.RecorderManager.record_post_reset"><code class="docutils literal notranslate"><span class="pre">RecorderManager.record_post_reset()</span></code></a></li>

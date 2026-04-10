@@ -649,11 +649,6 @@
 <span class="c1">#</span>
 <span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
 
-<span class="c1"># Copyright (c) 2024-2025, The Isaac Lab Project Developers.</span>
-<span class="c1"># All rights reserved.</span>
-<span class="c1">#</span>
-<span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -743,7 +738,7 @@
 
 <div class="viewcode-block" id="EpisodeData.add">
 <a class="viewcode-back" href="../../../../source/api/lab/isaaclab.utils.html#isaaclab.utils.datasets.EpisodeData.add">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">clone</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a key-value pair to the dataset.</span>
 
 <span class="sd">        The key can be nested by using the &quot;/&quot; character.</span>
@@ -752,13 +747,15 @@
 <span class="sd">        Args:</span>
 <span class="sd">            key: The key name.</span>
 <span class="sd">            value: The corresponding value of tensor type or of dict type.</span>
+<span class="sd">            clone: Whether to clone the tensor value before storing it in the episode data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># check datatype</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">sub_key</span><span class="p">,</span> <span class="n">sub_value</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sub_value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">sub_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sub_value</span><span class="p">,</span> <span class="n">clone</span><span class="o">=</span><span class="n">clone</span><span class="p">)</span>
             <span class="k">return</span>
 
+        <span class="n">stored</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="k">if</span> <span class="p">(</span><span class="n">clone</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">))</span> <span class="k">else</span> <span class="n">value</span>
         <span class="n">sub_keys</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
         <span class="n">current_dataset_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
         <span class="k">for</span> <span class="n">sub_key_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sub_keys</span><span class="p">)):</span>
@@ -766,9 +763,9 @@
                 <span class="c1"># Add value to the final dict layer</span>
                 <span class="c1"># Use lists to prevent slow tensor copy during concatenation</span>
                 <span class="k">if</span> <span class="n">sub_keys</span><span class="p">[</span><span class="n">sub_key_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_dataset_pointer</span><span class="p">:</span>
-                    <span class="n">current_dataset_pointer</span><span class="p">[</span><span class="n">sub_keys</span><span class="p">[</span><span class="n">sub_key_index</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">clone</span><span class="p">()]</span>
+                    <span class="n">current_dataset_pointer</span><span class="p">[</span><span class="n">sub_keys</span><span class="p">[</span><span class="n">sub_key_index</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="n">stored</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">current_dataset_pointer</span><span class="p">[</span><span class="n">sub_keys</span><span class="p">[</span><span class="n">sub_key_index</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+                    <span class="n">current_dataset_pointer</span><span class="p">[</span><span class="n">sub_keys</span><span class="p">[</span><span class="n">sub_key_index</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stored</span><span class="p">)</span>
                 <span class="k">break</span>
             <span class="c1"># key index</span>
             <span class="k">if</span> <span class="n">sub_keys</span><span class="p">[</span><span class="n">sub_key_index</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_dataset_pointer</span><span class="p">:</span>

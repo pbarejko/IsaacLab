@@ -1066,11 +1066,8 @@
 <span class="sd">            env_action_queue: The asyncio queue to put the action into.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            A dictionary containing the state, observation, action, and success of the multi-waypoint actions.</span>
+<span class="sd">            The success of the multi-waypoint actions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># current state</span>
-        <span class="n">state</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">is_relative</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
         <span class="c1"># construct action from target poses and gripper actions</span>
         <span class="n">target_eef_pose_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">eef_name</span><span class="p">:</span> <span class="n">waypoint</span><span class="o">.</span><span class="n">pose</span> <span class="k">for</span> <span class="n">eef_name</span><span class="p">,</span> <span class="n">waypoint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="n">gripper_action_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">eef_name</span><span class="p">:</span> <span class="n">waypoint</span><span class="o">.</span><span class="n">gripper_action</span> <span class="k">for</span> <span class="n">eef_name</span><span class="p">,</span> <span class="n">waypoint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
@@ -1097,21 +1094,14 @@
 
         <span class="c1"># step environment</span>
         <span class="k">if</span> <span class="n">env_action_queue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">obs</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">play_action</span><span class="p">)</span>
+            <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">play_action</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">await</span> <span class="n">env_action_queue</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">env_id</span><span class="p">,</span> <span class="n">play_action</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
             <span class="k">await</span> <span class="n">env_action_queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
-            <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">obs_buf</span>
 
         <span class="n">success</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">success_term</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="o">**</span><span class="n">success_term</span><span class="o">.</span><span class="n">params</span><span class="p">)[</span><span class="n">env_id</span><span class="p">])</span>
 
-        <span class="n">result</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-            <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="n">state</span><span class="p">],</span>
-            <span class="n">observations</span><span class="o">=</span><span class="p">[</span><span class="n">obs</span><span class="p">],</span>
-            <span class="n">actions</span><span class="o">=</span><span class="p">[</span><span class="n">play_action</span><span class="p">],</span>
-            <span class="n">success</span><span class="o">=</span><span class="n">success</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">success</span>
 </pre></div>
 
                 </article>

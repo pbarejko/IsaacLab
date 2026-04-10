@@ -652,6 +652,7 @@
 <span class="sd">&quot;&quot;&quot;Base class for data generator.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -677,6 +678,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_mimic.datagen.waypoint</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiWaypoint</span><span class="p">,</span> <span class="n">Waypoint</span><span class="p">,</span> <span class="n">WaypointSequence</span><span class="p">,</span> <span class="n">WaypointTrajectory</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.datagen_info_pool</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataGenInfoPool</span>
+
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">asynccontextmanager</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_optional_lock</span><span class="p">(</span><span class="n">lock</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async context manager that acquires the lock only if it is not None.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">lock</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">lock</span><span class="p">:</span>
+            <span class="k">yield</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">yield</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">transform_source_data_segment_using_delta_object_pose</span><span class="p">(</span>
@@ -1329,10 +1340,7 @@
         <span class="k">for</span> <span class="n">subtask_constraint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_cfg</span><span class="o">.</span><span class="n">task_constraint_configs</span><span class="p">:</span>
             <span class="n">runtime_subtask_constraints_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">subtask_constraint</span><span class="o">.</span><span class="n">generate_runtime_subtask_constraints</span><span class="p">())</span>
 
-        <span class="c1"># save generated data in these variables</span>
-        <span class="n">generated_states</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">generated_obs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">generated_actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Track if the generated trajectory was successful</span>
         <span class="n">generated_success</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># some eef-specific state variables used during generation</span>
@@ -1359,7 +1367,8 @@
 
         <span class="c1"># While loop that runs per time step</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">src_demo_datagen_info_pool</span><span class="o">.</span><span class="n">asyncio_lock</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">_optional_lock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_demo_datagen_info_pool</span><span class="o">.</span><span class="n">asyncio_lock</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">src_demo_datagen_info_pool</span><span class="o">.</span><span class="n">datagen_infos</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">prev_src_demo_datagen_info_pool_size</span><span class="p">:</span>
                     <span class="c1"># src_demo_datagen_info_pool at this point may be updated with new demos,</span>
                     <span class="c1"># So we need to update subtask boundaries again</span>
@@ -1536,20 +1545,18 @@
                 <span class="n">eef_waypoint_dict</span><span class="p">[</span><span class="n">eef_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">waypoint</span>
             <span class="n">multi_waypoint</span> <span class="o">=</span> <span class="n">MultiWaypoint</span><span class="p">(</span><span class="n">eef_waypoint_dict</span><span class="p">)</span>
 
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
             <span class="c1"># Execute the next waypoints for all eefs</span>
-            <span class="n">exec_results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">multi_waypoint</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="n">exec_success</span> <span class="o">=</span> <span class="k">await</span> <span class="n">multi_waypoint</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
                 <span class="n">env</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">,</span>
                 <span class="n">success_term</span><span class="o">=</span><span class="n">success_term</span><span class="p">,</span>
                 <span class="n">env_id</span><span class="o">=</span><span class="n">env_id</span><span class="p">,</span>
                 <span class="n">env_action_queue</span><span class="o">=</span><span class="n">env_action_queue</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="c1"># Update execution state buffers</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exec_results</span><span class="p">[</span><span class="s2">&quot;states&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">generated_states</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">exec_results</span><span class="p">[</span><span class="s2">&quot;states&quot;</span><span class="p">])</span>
-                <span class="n">generated_obs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">exec_results</span><span class="p">[</span><span class="s2">&quot;observations&quot;</span><span class="p">])</span>
-                <span class="n">generated_actions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">exec_results</span><span class="p">[</span><span class="s2">&quot;actions&quot;</span><span class="p">])</span>
-                <span class="n">generated_success</span> <span class="o">=</span> <span class="n">generated_success</span> <span class="ow">or</span> <span class="n">exec_results</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span>
+            <span class="c1"># Update success state</span>
+            <span class="n">generated_success</span> <span class="o">=</span> <span class="n">generated_success</span> <span class="ow">or</span> <span class="n">exec_success</span>
 
             <span class="c1"># Get the navigation state</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_cfg</span><span class="o">.</span><span class="n">datagen_config</span><span class="o">.</span><span class="n">use_navigation_controller</span><span class="p">:</span>
@@ -1648,10 +1655,6 @@
             <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">eef_subtasks_done</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
                 <span class="k">break</span>
 
-        <span class="c1"># Merge numpy arrays</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">generated_actions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">generated_actions</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">generated_actions</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
         <span class="c1"># Set success to the recorded episode data and export to file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">recorder_manager</span><span class="o">.</span><span class="n">set_success_to_episodes</span><span class="p">(</span>
             <span class="n">env_id_tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="n">generated_success</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
@@ -1661,9 +1664,6 @@
 
         <span class="n">results</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">initial_state</span><span class="o">=</span><span class="n">new_initial_state</span><span class="p">,</span>
-            <span class="n">states</span><span class="o">=</span><span class="n">generated_states</span><span class="p">,</span>
-            <span class="n">observations</span><span class="o">=</span><span class="n">generated_obs</span><span class="p">,</span>
-            <span class="n">actions</span><span class="o">=</span><span class="n">generated_actions</span><span class="p">,</span>
             <span class="n">success</span><span class="o">=</span><span class="n">generated_success</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">results</span></div>
