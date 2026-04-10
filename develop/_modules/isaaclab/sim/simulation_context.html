@@ -60,7 +60,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="3.0.0" />
-    <meta name="docbuild:last-update" content="Apr 09, 2026"/>
+    <meta name="docbuild:last-update" content="Apr 10, 2026"/>
   </head>
   
   
@@ -1349,9 +1349,15 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">render</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Step physics and optionally render.</span>
 
+<span class="sd">        If the timeline is paused (e.g. via the GUI), this method blocks and keeps</span>
+<span class="sd">        the visualizer responsive until the timeline is resumed or stopped.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            render: Whether to render the scene after stepping. Defaults to True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Block while the GUI timeline is paused so the entire training loop freezes.</span>
+        <span class="c1"># See: https://github.com/isaac-sim/IsaacLab/issues/4279</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">physics_manager</span><span class="o">.</span><span class="n">wait_for_playing</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_physics_step_count</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">physics_manager</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">render</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_rendering</span><span class="p">:</span>
@@ -1660,7 +1666,7 @@ By The Isaac Lab Project Developers.
   
   <div class="footer-item">
     <p class="last-updated">
-  Last updated on Apr 09, 2026.
+  Last updated on Apr 10, 2026.
   <br/>
 </p>
   </div>
