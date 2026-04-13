@@ -663,6 +663,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">gymnasium</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gym</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_tasks.utils.hydra</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_presets</span>
+
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.envs</span><span class="w"> </span><span class="kn">import</span> <span class="n">DirectRLEnvCfg</span><span class="p">,</span> <span class="n">ManagerBasedRLEnvCfg</span>
 
@@ -792,8 +794,6 @@
 <span class="sd">        RuntimeError: If the configuration for the task is not a class. We assume users always use a class for the</span>
 <span class="sd">            environment configuration.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_tasks.utils.hydra</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_preset_defaults</span>
-
     <span class="c1"># load the default configuration</span>
     <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_cfg_from_registry</span><span class="p">(</span><span class="n">task_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;env_cfg_entry_point&quot;</span><span class="p">)</span>
 
@@ -807,7 +807,7 @@
     <span class="c1"># Must happen BEFORE attribute overrides, otherwise overrides on PresetCfg wrapper</span>
     <span class="c1"># fields (e.g. cfg.scene when scene is a PresetCfg) get discarded when the wrapper</span>
     <span class="c1"># is replaced by its .default.</span>
-    <span class="n">cfg</span> <span class="o">=</span> <span class="n">resolve_preset_defaults</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">resolve_presets</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
 
     <span class="c1"># simulation device</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">sim</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>

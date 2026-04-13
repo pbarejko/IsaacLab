@@ -1,0 +1,1300 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>isaaclab_tasks.utils.hydra &#8212; Isaac Lab Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/twemoji.css" />
+    <link rel="stylesheet" type="text/css" href="/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/sphinxcontrib/icon/node_modules/@fortawesome/fontawesome-free/css/all.min.css?v=53359634" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=5774970f" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js"></script>
+    <script src="../../../_static/twemoji.js"></script>
+    <script src="/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/sphinxcontrib/icon/node_modules/@fortawesome/fontawesome-free/js/all.min.js?v=ec35c6c9"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/isaaclab_tasks/utils/hydra';</script>
+    <link rel="icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="3.0.0" />
+    <meta name="docbuild:last-update" content="Apr 13, 2026"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/NVIDIA-logo-white.png" class="logo__image only-light" alt=""/>
+    <img src="../../../_static/NVIDIA-logo-black.png" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">Isaac Lab Documentation</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+<nav class="bd-links bd-docs-nav">
+    <div class="bd-toc-item navbar-nav">
+      <ul class="nav bd-sidenav">
+        <li class="toctree-l1 has-children" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+          <div  style ="text-align:center;">
+            <label for="version-select" style="font-weight: bold; display: block;">Version</label>
+          </div>
+          <select id="version-select" class="version-dropdown" style="margin: 0 auto; display: block;" onchange="location = this.value;">
+            <option value="hydra.html" selected>develop</option>
+          </select>
+        </li>
+      </ul>
+    </div>
+</nav>
+</div>
+        <div class="sidebar-primary-item"><ul class="navbar-icon-links"
+    aria-label="Quick Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/isaac-sim/IsaacLab" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://developer.nvidia.com/isaac-sim" title="Isaac Sim" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/badge/IsaacSim-6.0.0-silver.svg" class="icon-link-image" alt="Isaac Sim"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://img.shields.io/github/stars/isaac-sim/IsaacLab?color=fedcba" title="Stars" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://img.shields.io/github/stars/isaac-sim/IsaacLab?color=fedcba" class="icon-link-image" alt="Stars"/></a>
+        </li>
+</ul></div>
+        <div class="sidebar-primary-item">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Isaac Lab</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../source/setup/ecosystem.html">Isaac Lab Ecosystem</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/setup/installation/index.html">Local Installation</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/installation/kitless_installation.html">Kit-less Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/installation/pip_installation.html">Installation using Isaac Sim Pip Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/installation/binaries_installation.html">Installation using Isaac Sim Pre-built Binaries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/installation/source_installation.html">Installation using Isaac Sim Source Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/installation/isaaclab_pip_installation.html">Installation using Isaac Lab Pip Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/installation/asset_caching.html">Asset Caching</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/deployment/index.html">Container Deployment</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/deployment/docker.html">Docker Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/deployment/run_docker_example.html">Running an example with Docker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/deployment/cluster.html">Cluster Guide</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/setup/installation/cloud_installation.html">Cloud Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/reference_architecture/index.html">Reference Architecture</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../source/setup/quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/setup/quick_installation.html">Quick Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/overview/own-project/index.html">Build your Own Project or Task</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/own-project/template.html">Create new project or task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/own-project/project_structure.html">Project Structure</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/setup/walkthrough/index.html">Walkthrough</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/walkthrough/concepts_env_design.html">Environment Design Background</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/walkthrough/api_env_design.html">Classes and Configs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/walkthrough/technical_env_design.html">Environment Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/walkthrough/training_jetbot_gt.html">Training the Jetbot: Ground Truth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/setup/walkthrough/training_jetbot_reward_exploration.html">Exploring the RL problem</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/tutorials/index.html">Tutorials</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/00_sim/create_empty.html">Creating an empty scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/00_sim/spawn_prims.html">Spawning prims into the scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/00_sim/launch_app.html">Deep-dive into AppLauncher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/01_assets/add_new_robot.html">Adding a New Robot to Isaac Lab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/01_assets/run_rigid_object.html">Interacting with a rigid object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/01_assets/run_articulation.html">Interacting with an articulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/01_assets/run_deformable_object.html">Interacting with a deformable object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/01_assets/run_surface_gripper.html">Interacting with a surface gripper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/02_scene/create_scene.html">Using the Interactive Scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/03_envs/create_manager_base_env.html">Creating a Manager-Based Base Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/03_envs/create_manager_rl_env.html">Creating a Manager-Based RL Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/03_envs/create_direct_rl_env.html">Creating a Direct Workflow RL Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/03_envs/register_rl_env_gym.html">Registering an Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/03_envs/run_rl_training.html">Training with an RL Agent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/03_envs/configuring_rl_training.html">Configuring an RL Agent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/03_envs/modify_direct_rl_env.html">Modifying an existing Direct RL Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/03_envs/policy_inference_in_usd.html">Policy Inference in USD Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/04_sensors/add_sensors_on_robot.html">Adding sensors on a robot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/05_controllers/run_diff_ik.html">Using a task-space controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/tutorials/05_controllers/run_osc.html">Using an operational space controller</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/how-to/index.html">How-to Guides</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/import_new_asset.html">Importing a New Asset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/write_articulation_cfg.html">Writing an Asset Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/robots.html">Robot Configurations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/make_fixed_prim.html">Making a physics prim fixed in the simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/multi_asset_spawning.html">Spawning Multiple Assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/cloning.html">Cloning Environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/save_camera_output.html">Saving rendered images and 3D re-projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/estimate_how_many_cameras_can_run.html">Find How Many/What Cameras You Should Train With</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/configure_rendering.html">Configuring RTX Rendering Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/draw_markers.html">Creating Visualization Markers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/wrap_rl_env.html">Wrapping environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/add_own_library.html">Adding your own learning library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/record_animation.html">Recording Animations of Simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/record_video.html">Recording video clips during training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/curriculums.html">Curriculum Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/master_omniverse.html">Mastering Omniverse for Robotics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/cloudxr_teleoperation.html">Setting up Isaac Teleop with CloudXR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/haply_teleoperation.html">Setting up Haply Teleoperation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/simulation_performance.html">PhysX Simulation Performance and Tuning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/how-to/optimize_stage_creation.html">Optimize Stage Creation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/overview/developer-guide/index.html">Developer’s Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/developer-guide/vs_code.html">Setting up Visual Studio Code</a></li>
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/developer-guide/repo_structure.html">Repository organization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/developer-guide/development.html">Extension Development</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/testing/index.html">Testing</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/testing/mock_interfaces.html">Mock Interfaces for Unit Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/testing/micro_benchmarks.html">Micro-Benchmarks for Performance Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/testing/benchmarks.html">Benchmarking Framework</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/overview/core-concepts/index.html">Core Concepts</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/core-concepts/multi_backend_architecture.html">Multi-Backend Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/core-concepts/task_workflows.html">Task Design Workflows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/core-concepts/actuators.html">Actuators</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../source/overview/core-concepts/sensors/index.html">Sensors</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../source/overview/core-concepts/sensors/camera.html">Camera</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../source/overview/core-concepts/sensors/contact_sensor.html">Contact Sensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../source/overview/core-concepts/sensors/frame_transformer.html">Frame Transformer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../source/overview/core-concepts/sensors/imu.html">Inertial Measurement Unit (IMU)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../source/overview/core-concepts/sensors/ray_caster.html">Ray Caster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../source/overview/core-concepts/sensors/visuo_tactile_sensor.html">Visuo-Tactile Sensor</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/core-concepts/renderers.html">Renderers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/core-concepts/motion_generators.html">Motion Generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/core-concepts/scene_data_providers.html">Scene Data Providers</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/overview/environments.html">Available Environments</a></li>
+
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/overview/reinforcement-learning/index.html">Reinforcement Learning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/reinforcement-learning/rl_existing_scripts.html">Reinforcement Learning Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/reinforcement-learning/rl_frameworks.html">Reinforcement Learning Library Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/reinforcement-learning/performance_benchmarks.html">Performance Benchmarks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/reinforcement-learning/training_guide.html">Debugging and Training Guide</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/overview/imitation-learning/index.html">Imitation Learning</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/imitation-learning/teleop_imitation.html">Teleoperation and Imitation Learning with Isaac Lab Mimic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/imitation-learning/humanoids_imitation.html">Examples: Data Generation and Imitation Learning for Humanoids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/imitation-learning/augmented_imitation.html">Augmented Imitation Learning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/overview/imitation-learning/skillgen.html">SkillGen for Automated Demonstration Generation</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/overview/showroom.html">Showroom Demos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/overview/simple_agents.html">Simple Agents</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Features</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../source/features/isaac_teleop.html">Isaac Teleop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/features/hydra.html">Hydra Configuration System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/features/multi_gpu.html">Multi-GPU and Multi-Node Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/features/population_based_training.html">Population Based Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/overview/core-concepts/sensors/camera.html">Tiled Rendering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/features/ray.html">Ray Job Dispatch and Tuning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/features/reproducibility.html">Reproducibility and Determinism</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/features/visualization.html">Visualization</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Experimental Features</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../source/experimental-features/bleeding-edge.html">Welcome to the bleeding edge!</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/experimental-features/newton-physics-integration/index.html">Newton Physics Integration</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/experimental-features/newton-physics-integration/installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/experimental-features/newton-physics-integration/limitations-and-known-bugs.html">Limitations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/experimental-features/newton-physics-integration/solver-transitioning.html">Solver Transitioning</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Resources</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/policy_deployment/index.html">Sim2Real Deployment of Policies Trained in Isaac Lab</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/policy_deployment/00_hover/hover_policy.html">Training &amp; Deploying HOVER Policy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/policy_deployment/01_io_descriptors/io_descriptors_101.html">IO Descriptors 101</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/policy_deployment/02_gear_assembly/gear_assembly_policy.html">Training a Gear Insertion Policy and ROS Deployment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/policy_deployment/03_compass_with_NuRec/compass_navigation_policy_with_NuRec.html">Training &amp; Deploying COMPASS Navigation Policy with Real2Sim NuRec</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/policy_deployment/04_reach/reach_policy.html">Training a Reach Policy for Real Robot Deployment</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Migration Guides</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../source/migration/migrating_to_isaaclab_3-0.html">Migrating to Isaac Lab 3.0</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/migration/migrating_from_isaacgymenvs.html">From IsaacGymEnvs</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/migration/comparing_simulation_isaacgym.html">Comparing Simulations Between Isaac Gym and Isaac Lab</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/migration/migrating_from_omniisaacgymenvs.html">From OmniIsaacGymEnvs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/migration/migrating_from_orbit.html">From Orbit</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Source API</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../source/api/index.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.app.html">isaaclab.app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.actuators.html">isaaclab.actuators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.assets.html">isaaclab.assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.cloner.html">isaaclab.cloner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.controllers.html">isaaclab.controllers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.devices.html">isaaclab.devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.envs.html">isaaclab.envs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.managers.html">isaaclab.managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.markers.html">isaaclab.markers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.physics.html">isaaclab.physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.renderers.html">isaaclab.renderers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.scene.html">isaaclab.scene</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.sensors.html">isaaclab.sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.sim.html">isaaclab.sim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.terrains.html">isaaclab.terrains</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.utils.html">isaaclab.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.visualizers.html">isaaclab.visualizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.envs.mdp.html">isaaclab.envs.mdp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.envs.ui.html">isaaclab.envs.ui</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.sensors.patterns.html">isaaclab.sensors.patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.sim.converters.html">isaaclab.sim.converters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.sim.schemas.html">isaaclab.sim.schemas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.sim.spawners.html">isaaclab.sim.spawners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.sim.views.html">isaaclab.sim.views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab/isaaclab.sim.utils.html">isaaclab.sim.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_rl/isaaclab_rl.html">isaaclab_rl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_mimic/isaaclab_mimic.datagen.html">isaaclab_mimic.datagen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_mimic/isaaclab_mimic.envs.html">isaaclab_mimic.envs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_contrib/isaaclab_contrib.actuators.html">isaaclab_contrib.actuators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_contrib/isaaclab_contrib.assets.html">isaaclab_contrib.assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_contrib/isaaclab_contrib.mdp.html">isaaclab_contrib.mdp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_contrib/isaaclab_contrib.rl.html">isaaclab_contrib.rl</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_contrib/isaaclab_contrib.sensors.html">isaaclab_contrib.sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_tasks/isaaclab_tasks.utils.html">isaaclab_tasks.utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_teleop/isaaclab_teleop.html">isaaclab_teleop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.assets.html">isaaclab_physx.assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.cloner.html">isaaclab_physx.cloner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.physics.html">isaaclab_physx.physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.renderers.html">isaaclab_physx.renderers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.scene_data_providers.html">isaaclab_physx.scene_data_providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.sensors.html">isaaclab_physx.sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.assets.html">isaaclab_physx.assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.cloner.html">isaaclab_physx.cloner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.physics.html">isaaclab_physx.physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.renderers.html">isaaclab_physx.renderers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.scene_data_providers.html">isaaclab_physx.scene_data_providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_physx/isaaclab_physx.sensors.html">isaaclab_physx.sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.assets.html">isaaclab_newton.assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.cloner.html">isaaclab_newton.cloner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.physics.html">isaaclab_newton.physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.renderers.html">isaaclab_newton.renderers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.scene_data_providers.html">isaaclab_newton.scene_data_providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.sensors.html">isaaclab_newton.sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.assets.html">isaaclab_newton.assets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.cloner.html">isaaclab_newton.cloner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.physics.html">isaaclab_newton.physics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.renderers.html">isaaclab_newton.renderers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.scene_data_providers.html">isaaclab_newton.scene_data_providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_newton/isaaclab_newton.sensors.html">isaaclab_newton.sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_ov/isaaclab_ov.renderers.html">isaaclab_ov.renderers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_ov/isaaclab_ov.renderers.html">isaaclab_ov.renderers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_assets/isaaclab_assets.robots.html">isaaclab_assets.robots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_assets/isaaclab_assets.sensors.html">isaaclab_assets.sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_assets/isaaclab_assets.robots.html">isaaclab_assets.robots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_assets/isaaclab_assets.sensors.html">isaaclab_assets.sensors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_visualizers/isaaclab_visualizers.kit.html">isaaclab_visualizers.kit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_visualizers/isaaclab_visualizers.newton.html">isaaclab_visualizers.newton</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_visualizers/isaaclab_visualizers.rerun.html">isaaclab_visualizers.rerun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_visualizers/isaaclab_visualizers.viser.html">isaaclab_visualizers.viser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_visualizers/isaaclab_visualizers.kit.html">isaaclab_visualizers.kit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_visualizers/isaaclab_visualizers.newton.html">isaaclab_visualizers.newton</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_visualizers/isaaclab_visualizers.rerun.html">isaaclab_visualizers.rerun</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../source/api/lab_visualizers/isaaclab_visualizers.viser.html">isaaclab_visualizers.viser</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/additional_resources.html">Additional Resources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/contributing.html">Contribution Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/troubleshooting.html">Tricks and Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/migration.html">Migration Guide (Isaac Sim)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/release_notes.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/changelog.html">Extensions Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/refs/bibliography.html">Bibliography</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Project Links</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference external" href="https://github.com/isaac-sim/IsaacLab">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://docs.isaacsim.omniverse.nvidia.com/latest/index.html">NVIDIA Isaac Sim</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://nvidia-omniverse.github.io/PhysX/physx/5.4.1/index.html">NVIDIA PhysX</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/newton-physics/newton">NVIDIA Newton</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/isaac-sim/IsaacLab" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/isaac-sim/IsaacLab/issues/new?title=Issue%20on%20page%20%2F_modules/isaaclab_tasks/utils/hydra.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for isaaclab_tasks.utils.hydra</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2022-2026, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># SPDX-License-Identifier: BSD-3-Clause</span>
+
+<span class="sd">&quot;&quot;&quot;Hydra utilities with REPLACE-only preset system.</span>
+
+<span class="sd">This module bypasses Hydra&#39;s default MERGE behavior for config groups.</span>
+<span class="sd">Instead, when a preset is selected, the entire config section is REPLACED</span>
+<span class="sd">with the preset -- no field merging.</span>
+
+<span class="sd">Presets are declared by subclassing :class:`PresetCfg` (or using the</span>
+<span class="sd">:func:`preset` factory for scalars). The system recursively discovers all</span>
+<span class="sd">presets and their paths automatically, including inside dict-valued fields.</span>
+
+<span class="sd">Override categories (applied in order):</span>
+<span class="sd">    1. Global presets: ``presets=inference,newton`` -- apply everywhere matching</span>
+<span class="sd">    2. Path presets: ``env.backend=newton`` -- REPLACE specific section</span>
+<span class="sd">    3. Preset-path scalars: ``env.backend.dt=0.001`` -- handled by us</span>
+<span class="sd">    4. Global scalars: ``env.decimation=10`` -- handled by Hydra</span>
+
+<span class="sd">Example usage::</span>
+
+<span class="sd">    presets=newton env.backend.dt=0.001 env.decimation=10</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Mapping</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">hydra</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydra.core.config_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigStore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">omegaconf</span><span class="w"> </span><span class="kn">import</span> <span class="n">OmegaConf</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.envs.utils.spaces</span><span class="w"> </span><span class="kn">import</span> <span class="n">replace_env_cfg_spaces_with_strings</span><span class="p">,</span> <span class="n">replace_strings_with_env_cfg_spaces</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">configclass</span><span class="p">,</span> <span class="n">replace_slices_with_strings</span><span class="p">,</span> <span class="n">replace_strings_with_slices</span>
+
+<span class="n">_LITERAL_MAP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;true&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;null&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="PresetCfg">
+<a class="viewcode-back" href="../../../source/api/lab_tasks/isaaclab_tasks.utils.html#isaaclab_tasks.utils.PresetCfg">[docs]</a>
+<span class="nd">@configclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PresetCfg</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for declarative preset definitions.</span>
+
+<span class="sd">    Subclass this and define fields as preset options.</span>
+<span class="sd">    The field named ``default`` holds the config instance used</span>
+<span class="sd">    when no CLI override is given. All other fields are named</span>
+<span class="sd">    alternative presets.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        @configclass</span>
+<span class="sd">        class PhysicsCfg(PresetCfg):</span>
+<span class="sd">            default: PhysxCfg = PhysxCfg()</span>
+<span class="sd">            newton: NewtonCfg = NewtonCfg()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="preset">
+<a class="viewcode-back" href="../../../source/api/lab_tasks/isaaclab_tasks.utils.html#isaaclab_tasks.utils.preset">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">preset</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PresetCfg</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a :class:`PresetCfg` instance from keyword arguments.</span>
+
+<span class="sd">    A convenience factory that dynamically builds a ``PresetCfg`` subclass</span>
+<span class="sd">    with one field per keyword argument, then returns an instance of it.</span>
+<span class="sd">    The caller **must** supply a ``default`` key.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        armature = preset(default=0.0, newton=0.01)</span>
+<span class="sd">        # Equivalent to:</span>
+<span class="sd">        # @configclass</span>
+<span class="sd">        # class _Preset(PresetCfg):</span>
+<span class="sd">        #     default: float = 0.0</span>
+<span class="sd">        #     newton: float = 0.01</span>
+<span class="sd">        # armature = _Preset()</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        **options: Preset alternatives keyed by name.  Must include ``default``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A ``PresetCfg`` instance whose fields are the supplied options.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If ``default`` is not provided.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;default&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;preset() requires a &#39;default&#39; keyword argument.&quot;</span><span class="p">)</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">object</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">ns</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;__annotations__&quot;</span><span class="p">:</span> <span class="n">annotations</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">}</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="n">configclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="s2">&quot;_Preset&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">PresetCfg</span><span class="p">,),</span> <span class="n">ns</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">()</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_preset_fields</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract all alternatives from a :class:`PresetCfg`, class attrs over instance.</span>
+
+<span class="sd">    Class-level values take priority because robot-specific modules</span>
+<span class="sd">    (e.g. ``joint_pos_env_cfg.py``) reassign fields on the class after</span>
+<span class="sd">    instances are already created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">preset_obj</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="p">:</span>
+        <span class="n">cls_val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="n">fn</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls_val</span> <span class="k">if</span> <span class="n">cls_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">d</span> <span class="ow">or</span> <span class="nb">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr</span><span class="p">)):</span>
+            <span class="k">continue</span>
+        <span class="n">d</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_walk_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">on_preset</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Depth-first walk of a config tree, calling *on_preset(parent, key, obj, path)*</span>
+<span class="sd">    for every :class:`PresetCfg` node.  Recurses through dataclass attrs, dicts, and</span>
+<span class="sd">    nested dicts transparently.&quot;&quot;&quot;</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="n">child_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="n">key</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">PresetCfg</span><span class="p">):</span>
+            <span class="n">on_preset</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">child_path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;__dataclass_fields__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">_walk_cfg</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">child_path</span><span class="p">,</span> <span class="n">on_preset</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">collect_presets</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively discover :class:`PresetCfg` nodes in the config tree.</span>
+
+<span class="sd">    Walks dataclass fields and dict values at any nesting depth.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cfg: A configclass instance to walk.</span>
+<span class="sd">        path: Current path prefix (used during recursion).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict mapping dotted paths to preset dicts, e.g.:</span>
+<span class="sd">        ``{&quot;backend&quot;: {&quot;default&quot;: PhysxCfg(), &quot;newton&quot;: NewtonCfg()}}``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_record</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">,</span> <span class="n">preset_path</span><span class="p">):</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">_preset_fields</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">preset_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">fields</span>
+        <span class="k">for</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="s2">&quot;__dataclass_fields__&quot;</span><span class="p">):</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">collect_presets</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">preset_path</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">alt</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s2">&quot;__dataclass_fields__&quot;</span><span class="p">):</span>
+                        <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">collect_presets</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">preset_path</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">PresetCfg</span><span class="p">):</span>
+        <span class="n">_record</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="n">_walk_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">_p</span><span class="p">,</span> <span class="n">_k</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">cp</span><span class="p">:</span> <span class="n">_record</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">cp</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="c1"># ============================================================================</span>
+<span class="c1"># Preset resolution</span>
+<span class="c1"># ============================================================================</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pick_alternative</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">:</span> <span class="n">PresetCfg</span><span class="p">,</span> <span class="n">selected</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose the best alternative from a PresetCfg.</span>
+
+<span class="sd">    Priority: first match in ``selected``, then ``default`` (preferring</span>
+<span class="sd">    class-level over instance-level).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If no matching name and no ``default`` field exists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">_preset_fields</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">fields</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;default&quot;</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fields</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;PresetCfg </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> at &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; has no &#39;default&#39; field &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;and none of the selected presets </span><span class="si">{</span><span class="n">selected</span><span class="si">}</span><span class="s2"> match its fields </span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">.&quot;</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="resolve_presets">
+<a class="viewcode-back" href="../../../source/api/lab_tasks/isaaclab_tasks.utils.html#isaaclab_tasks.utils.resolve_presets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_presets</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">selected</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">()):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace every :class:`PresetCfg` in the tree with the best alternative.</span>
+
+<span class="sd">    For each ``PresetCfg`` found during a depth-first walk:</span>
+
+<span class="sd">    1. Pick the first name from *selected* that exists as a field on the</span>
+<span class="sd">       preset, otherwise fall back to ``default``.</span>
+<span class="sd">    2. Replace the preset in its parent (dict key or dataclass attr).</span>
+<span class="sd">    3. Continue walking the replacement (which may contain more presets).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cfg: A configclass, dict, or PresetCfg to resolve in-place.</span>
+<span class="sd">        selected: Set of preset names chosen by the user (e.g. from CLI</span>
+<span class="sd">            ``presets=peg_insert_4mm,eval``).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The resolved ``cfg`` (possibly a different object if the root itself</span>
+<span class="sd">        was a PresetCfg).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">PresetCfg</span><span class="p">):</span>
+        <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="nb">id</span><span class="p">(</span><span class="n">cfg</span><span class="p">)}</span>
+        <span class="n">replacement</span> <span class="o">=</span> <span class="n">_pick_alternative</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">selected</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;&lt;root&gt;&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">PresetCfg</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cyclic PresetCfg chain detected at &#39;&lt;root&gt;&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> was already visited.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">replacement</span><span class="p">))</span>
+            <span class="n">replacement</span> <span class="o">=</span> <span class="n">_pick_alternative</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">selected</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">&quot;&lt;root&gt;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resolve_presets</span><span class="p">(</span><span class="n">replacement</span><span class="p">,</span> <span class="n">selected</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">preset_obj</span><span class="p">,</span> <span class="n">_path</span><span class="p">):</span>
+        <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="nb">id</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">)}</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">_pick_alternative</span><span class="p">(</span><span class="n">preset_obj</span><span class="p">,</span> <span class="n">selected</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">_path</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">PresetCfg</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cyclic PresetCfg chain detected at &#39;</span><span class="si">{</span><span class="n">_path</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> was already visited.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">_pick_alternative</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">selected</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">parent</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;__dataclass_fields__&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">_walk_cfg</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">_path</span><span class="p">,</span> <span class="n">_resolve</span><span class="p">)</span>
+
+    <span class="n">_walk_cfg</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">_resolve</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cfg</span></div>
+
+
+
+<span class="c1"># ============================================================================</span>
+<span class="c1"># CLI / Hydra integration</span>
+<span class="c1"># ============================================================================</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_hydra</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="p">,</span> <span class="n">presets</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Shared Hydra entry point for :func:`resolve_task_config` and :func:`hydra_task_config`.&quot;&quot;&quot;</span>
+    <span class="n">global_presets</span><span class="p">,</span> <span class="n">preset_sel</span><span class="p">,</span> <span class="n">preset_scalar</span><span class="p">,</span> <span class="n">global_scalar</span> <span class="o">=</span> <span class="n">parse_overrides</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">presets</span><span class="p">)</span>
+    <span class="n">original_argv</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="p">[</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+</span> <span class="n">global_scalar</span>
+
+    <span class="nd">@hydra</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">config_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config_name</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">version_base</span><span class="o">=</span><span class="s2">&quot;1.3&quot;</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hydra_main</span><span class="p">(</span><span class="n">hydra_cfg</span><span class="p">,</span> <span class="n">env_cfg</span><span class="o">=</span><span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="o">=</span><span class="n">agent_cfg</span><span class="p">):</span>
+        <span class="n">hydra_cfg</span> <span class="o">=</span> <span class="n">replace_strings_with_slices</span><span class="p">(</span><span class="n">OmegaConf</span><span class="o">.</span><span class="n">to_container</span><span class="p">(</span><span class="n">hydra_cfg</span><span class="p">,</span> <span class="n">resolve</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span> <span class="o">=</span> <span class="n">apply_overrides</span><span class="p">(</span>
+            <span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="p">,</span> <span class="n">hydra_cfg</span><span class="p">,</span> <span class="n">global_presets</span><span class="p">,</span> <span class="n">preset_sel</span><span class="p">,</span> <span class="n">preset_scalar</span><span class="p">,</span> <span class="n">presets</span>
+        <span class="p">)</span>
+        <span class="n">env_cfg</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">hydra_cfg</span><span class="p">[</span><span class="s2">&quot;env&quot;</span><span class="p">])</span>
+        <span class="n">env_cfg</span> <span class="o">=</span> <span class="n">replace_strings_with_env_cfg_spaces</span><span class="p">(</span><span class="n">env_cfg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent_cfg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">agent_cfg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">agent_cfg</span> <span class="o">=</span> <span class="n">hydra_cfg</span><span class="p">[</span><span class="s2">&quot;agent&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">agent_cfg</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">hydra_cfg</span><span class="p">[</span><span class="s2">&quot;agent&quot;</span><span class="p">])</span>
+        <span class="n">callback</span><span class="p">(</span><span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hydra_main</span><span class="p">()</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="o">=</span> <span class="n">original_argv</span>
+
+
+<div class="viewcode-block" id="resolve_task_config">
+<a class="viewcode-back" href="../../../source/api/lab_tasks/isaaclab_tasks.utils.html#isaaclab_tasks.utils.resolve_task_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_task_config</span><span class="p">(</span><span class="n">task_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent_cfg_entry_point</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve env and agent configs with Hydra overrides, presets, and scalars fully applied.</span>
+
+<span class="sd">    Safe to call before Kit is launched -- callable config values are stored as</span>
+<span class="sd">    :class:`~isaaclab.utils.string.ResolvableString` and resolved lazily on</span>
+<span class="sd">    first use, so no implementation modules are imported eagerly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        task_name: Task name (e.g., &quot;Isaac-Velocity-Flat-Anymal-C-v0&quot;).</span>
+<span class="sd">        agent_cfg_entry_point: Agent config entry point key (e.g., &quot;rsl_rl_cfg_entry_point&quot;).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of (env_cfg, agent_cfg) fully resolved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">task_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="p">,</span> <span class="n">presets</span> <span class="o">=</span> <span class="n">register_task</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">agent_cfg_entry_point</span><span class="p">)</span>
+    <span class="n">resolved</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_run_hydra</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="p">,</span> <span class="n">presets</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">resolved</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">env_cfg</span><span class="o">=</span><span class="n">e</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="o">=</span><span class="n">a</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">resolved</span><span class="p">[</span><span class="s2">&quot;env_cfg&quot;</span><span class="p">],</span> <span class="n">resolved</span><span class="p">[</span><span class="s2">&quot;agent_cfg&quot;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="hydra_task_config">
+<a class="viewcode-back" href="../../../source/api/lab_tasks/isaaclab_tasks.utils.html#isaaclab_tasks.utils.hydra_task_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">hydra_task_config</span><span class="p">(</span><span class="n">task_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent_cfg_entry_point</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator for Hydra config with REPLACE-only preset semantics.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        task_name: Task name (e.g., &quot;Isaac-Reach-Franka-v0&quot;)</span>
+<span class="sd">        agent_cfg_entry_point: Agent config entry point key</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Decorated function receiving ``(env_cfg, agent_cfg, *args, **kwargs)``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">task_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="p">,</span> <span class="n">presets</span> <span class="o">=</span> <span class="n">register_task</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">agent_cfg_entry_point</span><span class="p">)</span>
+            <span class="n">_run_hydra</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="p">,</span> <span class="n">presets</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">func</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_unknown_presets_error</span><span class="p">(</span><span class="n">unknown</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name_to_paths</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">max_paths</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a readable error message grouping presets by identical path fingerprints.&quot;&quot;&quot;</span>
+    <span class="n">fingerprint_to_names</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">paths</span> <span class="ow">in</span> <span class="n">name_to_paths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">paths</span><span class="p">))</span>
+        <span class="n">fingerprint_to_names</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;Unknown preset(s): </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unknown</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Available presets (grouped by affected paths):&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">paths_tuple</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fingerprint_to_names</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">fingerprint_to_names</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fingerprint_to_names</span><span class="p">[</span><span class="n">paths_tuple</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">[:</span><span class="mi">25</span><span class="p">])</span><span class="si">}</span><span class="s2">, ... (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s2"> total)&quot;</span><span class="p">)</span>
+        <span class="n">shown</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">paths_tuple</span><span class="p">[:</span><span class="n">max_paths</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">shown</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    -&gt; </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths_tuple</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">shown</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remaining</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    ... (</span><span class="si">{</span><span class="n">remaining</span><span class="si">}</span><span class="s2"> more)&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">register_task</span><span class="p">(</span><span class="n">task_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">agent_entry</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load configs, collect presets recursively, register base config to Hydra.</span>
+
+<span class="sd">    Presets are collected from nested configclasses and stored separately -</span>
+<span class="sd">    NOT registered as Hydra groups to avoid Hydra&#39;s merge behavior.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (env_cfg, agent_cfg, presets) where presets =</span>
+<span class="sd">        {&quot;env&quot;: {&quot;path&quot;: {&quot;name&quot;: cfg}}, &quot;agent&quot;: {...}}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_tasks.utils.parse_cfg</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_cfg_from_registry</span>
+
+    <span class="n">env_cfg</span> <span class="o">=</span> <span class="n">load_cfg_from_registry</span><span class="p">(</span><span class="n">task_name</span><span class="p">,</span> <span class="s2">&quot;env_cfg_entry_point&quot;</span><span class="p">)</span>
+    <span class="n">agent_cfg</span> <span class="o">=</span> <span class="n">load_cfg_from_registry</span><span class="p">(</span><span class="n">task_name</span><span class="p">,</span> <span class="n">agent_entry</span><span class="p">)</span> <span class="k">if</span> <span class="n">agent_entry</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="c1"># Collect presets before resolution (needed for path-based overrides)</span>
+    <span class="n">presets</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">collect_presets</span><span class="p">(</span><span class="n">env_cfg</span><span class="p">),</span>
+        <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="n">collect_presets</span><span class="p">(</span><span class="n">agent_cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">agent_cfg</span> <span class="k">else</span> <span class="p">{},</span>
+    <span class="p">}</span>
+
+    <span class="n">selected</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;presets&quot;</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">selected</span><span class="p">:</span>
+        <span class="n">name_to_paths</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">sec</span><span class="p">,</span> <span class="n">sec_presets</span> <span class="ow">in</span> <span class="n">presets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">fields</span> <span class="ow">in</span> <span class="n">sec_presets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">full</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sec</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="n">sec</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                    <span class="n">name_to_paths</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">full</span><span class="p">)</span>
+        <span class="n">unknown</span> <span class="o">=</span> <span class="n">selected</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">name_to_paths</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+            <span class="n">display</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">p</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">name_to_paths</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="s2">&quot;default&quot;</span><span class="p">}</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">_format_unknown_presets_error</span><span class="p">(</span><span class="n">unknown</span><span class="p">,</span> <span class="n">display</span><span class="p">))</span>
+
+    <span class="n">env_cfg</span> <span class="o">=</span> <span class="n">resolve_presets</span><span class="p">(</span><span class="n">env_cfg</span><span class="p">,</span> <span class="n">selected</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">agent_cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">agent_cfg</span> <span class="o">=</span> <span class="n">resolve_presets</span><span class="p">(</span><span class="n">agent_cfg</span><span class="p">,</span> <span class="n">selected</span><span class="p">)</span>
+
+    <span class="c1"># Also resolve presets inside collected alternatives so that apply_overrides</span>
+    <span class="c1"># never re-introduces unresolved PresetCfg objects when applying a selection.</span>
+    <span class="k">for</span> <span class="n">section_presets</span> <span class="ow">in</span> <span class="n">presets</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">path_presets</span> <span class="ow">in</span> <span class="n">section_presets</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">path_presets</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">resolve_presets</span><span class="p">(</span><span class="n">alt</span><span class="p">,</span> <span class="n">selected</span><span class="p">)</span>
+
+    <span class="c1"># Convert to dict for Hydra (handle gym spaces and slices)</span>
+    <span class="n">env_cfg</span> <span class="o">=</span> <span class="n">replace_env_cfg_spaces_with_strings</span><span class="p">(</span><span class="n">env_cfg</span><span class="p">)</span>
+    <span class="n">agent_dict</span> <span class="o">=</span> <span class="n">agent_cfg</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">agent_cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">agent_cfg</span><span class="p">,</span> <span class="s2">&quot;to_dict&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">agent_cfg</span>
+    <span class="n">env_dict</span> <span class="o">=</span> <span class="n">env_cfg</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>  <span class="c1"># type: ignore[union-attr]</span>
+    <span class="n">cfg_dict</span> <span class="o">=</span> <span class="n">replace_slices_with_strings</span><span class="p">({</span><span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">env_dict</span><span class="p">,</span> <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="n">agent_dict</span><span class="p">})</span>
+
+    <span class="c1"># Register plain config (no groups) - Hydra only handles global scalars</span>
+    <span class="n">ConfigStore</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">task_name</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="n">OmegaConf</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">cfg_dict</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">env_cfg</span><span class="p">,</span> <span class="n">agent_cfg</span><span class="p">,</span> <span class="n">presets</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_overrides</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">presets</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Categorize command line args by type.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Command line args (without script name)</span>
+<span class="sd">        presets: {&quot;env&quot;: {&quot;path&quot;: {&quot;name&quot;: cfg}}, &quot;agent&quot;: {...}}</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (global_presets, preset_sel, preset_scalar, global_scalar) where:</span>
+<span class="sd">        - global_presets: [name, ...] - apply to all matching configs</span>
+<span class="sd">        - preset_sel: [(section, path, name), ...] - REPLACE selections</span>
+<span class="sd">        - preset_scalar: [(full_path, value), ...] - scalars in preset paths</span>
+<span class="sd">        - global_scalar: [arg, ...] - pass to Hydra</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">preset_paths</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">p</span> <span class="k">else</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">presets</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">v</span><span class="p">}</span>
+    <span class="n">global_presets</span><span class="p">,</span> <span class="n">preset_sel</span><span class="p">,</span> <span class="n">preset_scalar</span><span class="p">,</span> <span class="n">global_scalar</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
+            <span class="n">global_scalar</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;presets&quot;</span><span class="p">:</span>
+            <span class="n">global_presets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">preset_paths</span><span class="p">:</span>
+            <span class="n">sec</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">key</span> <span class="k">else</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">preset_sel</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sec</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">pp</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">preset_paths</span><span class="p">):</span>
+            <span class="n">preset_scalar</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">global_scalar</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+
+    <span class="n">preset_sel</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">global_presets</span><span class="p">,</span> <span class="n">preset_sel</span><span class="p">,</span> <span class="n">preset_scalar</span><span class="p">,</span> <span class="n">global_scalar</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_overrides</span><span class="p">(</span>
+    <span class="n">env_cfg</span><span class="p">,</span>
+    <span class="n">agent_cfg</span><span class="p">,</span>
+    <span class="n">hydra_cfg</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">global_presets</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">preset_sel</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">preset_scalar</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">presets</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply preset selections and scalar overrides with REPLACE semantics.</span>
+
+<span class="sd">    Global presets are already applied by :func:`resolve_presets` in</span>
+<span class="sd">    :func:`register_task`. This function handles:</span>
+
+<span class="sd">    1. Path-based selections (``env.backend=newton``)</span>
+<span class="sd">    2. Scalar overrides within preset paths (``env.backend.dt=0.001``)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (env_cfg, agent_cfg) -- possibly replaced if root-level PresetCfg was resolved.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If multiple global presets conflict on the same path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cfgs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;env&quot;</span><span class="p">:</span> <span class="n">env_cfg</span><span class="p">,</span> <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="n">agent_cfg</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_path_reachable</span><span class="p">(</span><span class="n">sec</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cfgs</span><span class="p">[</span><span class="n">sec</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">cfgs</span><span class="p">[</span><span class="n">sec</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="n">part</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># --- Phase 1: path-based selections + global broadcast for reachable paths</span>
+    <span class="n">resolved</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">sec</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">preset_sel</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">presets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown preset group: </span><span class="si">{</span><span class="n">sec</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">presets</span><span class="p">[</span><span class="n">sec</span><span class="p">][</span><span class="n">path</span><span class="p">]:</span>
+            <span class="n">avail</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">presets</span><span class="p">[</span><span class="n">sec</span><span class="p">][</span><span class="n">path</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown preset &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; for </span><span class="si">{</span><span class="n">sec</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">. Available: </span><span class="si">{</span><span class="n">avail</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sec</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="n">sec</span>
+        <span class="n">resolved</span><span class="p">[</span><span class="n">full_path</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="n">applied_by</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">global_presets</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;env&quot;</span><span class="p">,</span> <span class="s2">&quot;agent&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">path_presets</span> <span class="ow">in</span> <span class="n">presets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">path_presets</span><span class="p">:</span>
+                    <span class="n">full_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sec</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="n">sec</span>
+                    <span class="k">if</span> <span class="n">full_path</span> <span class="ow">in</span> <span class="n">applied_by</span><span class="p">:</span>
+                        <span class="n">prev_name</span> <span class="o">=</span> <span class="n">applied_by</span><span class="p">[</span><span class="n">full_path</span><span class="p">]</span>
+                        <span class="n">prev_val</span> <span class="o">=</span> <span class="n">path_presets</span><span class="p">[</span><span class="n">prev_name</span><span class="p">]</span>
+                        <span class="n">cur_val</span> <span class="o">=</span> <span class="n">path_presets</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">prev_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">cur_val</span> <span class="ow">and</span> <span class="n">prev_val</span> <span class="o">!=</span> <span class="n">cur_val</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;Conflicting global presets: &#39;</span><span class="si">{</span><span class="n">prev_name</span><span class="si">}</span><span class="s2">&#39; and &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;both define preset for &#39;</span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                            <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">applied_by</span><span class="p">[</span><span class="n">full_path</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="n">resolved</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">sec</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;env&quot;</span><span class="p">,</span> <span class="s2">&quot;agent&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">path_presets</span> <span class="ow">in</span> <span class="n">presets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;default&quot;</span> <span class="ow">in</span> <span class="n">path_presets</span><span class="p">:</span>
+                <span class="n">full_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sec</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="n">sec</span>
+                <span class="n">resolved</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">))</span>
+
+    <span class="c1"># --- Phase 2: apply in depth order, pruning unreachable children</span>
+    <span class="k">for</span> <span class="n">full_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">resolved</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">fp</span><span class="p">:</span> <span class="n">fp</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)):</span>
+        <span class="n">sec</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">resolved</span><span class="p">[</span><span class="n">full_path</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">cfgs</span><span class="p">[</span><span class="n">sec</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_path_reachable</span><span class="p">(</span><span class="n">sec</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">presets</span><span class="p">[</span><span class="n">sec</span><span class="p">][</span><span class="n">path</span><span class="p">][</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">node_dict</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s2">&quot;to_dict&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="k">else</span> <span class="n">node</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+                <span class="n">cfgs</span><span class="p">[</span><span class="n">sec</span><span class="p">],</span> <span class="n">hydra_cfg</span><span class="p">[</span><span class="n">sec</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="p">,</span> <span class="n">node_dict</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_setattr</span><span class="p">(</span><span class="n">cfgs</span><span class="p">[</span><span class="n">sec</span><span class="p">],</span> <span class="n">path</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+                <span class="n">_setattr</span><span class="p">(</span><span class="n">hydra_cfg</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sec</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">node_dict</span><span class="p">)</span>
+
+    <span class="c1"># --- Phase 3: scalar overrides within preset paths</span>
+    <span class="k">for</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">val_str</span> <span class="ow">in</span> <span class="n">preset_scalar</span><span class="p">:</span>
+        <span class="n">sec</span> <span class="o">=</span> <span class="n">full_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">sec</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cfgs</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">full_path</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">sec</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+        <span class="k">if</span> <span class="n">cfgs</span><span class="p">[</span><span class="n">sec</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">_parse_val</span><span class="p">(</span><span class="n">val_str</span><span class="p">)</span>
+            <span class="n">_setattr</span><span class="p">(</span><span class="n">cfgs</span><span class="p">[</span><span class="n">sec</span><span class="p">],</span> <span class="n">path</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="n">_setattr</span><span class="p">(</span><span class="n">hydra_cfg</span><span class="p">,</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cfgs</span><span class="p">[</span><span class="s2">&quot;env&quot;</span><span class="p">],</span> <span class="n">cfgs</span><span class="p">[</span><span class="s2">&quot;agent&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set nested attribute/key (e.g., &quot;actions.arm_action.scale&quot;).&quot;&quot;&quot;</span>
+    <span class="o">*</span><span class="n">parts</span><span class="p">,</span> <span class="n">leaf</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">obj</span><span class="p">[</span><span class="n">leaf</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">leaf</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_val</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse string to Python value (bool, None, int, float, or str).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">_LITERAL_MAP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_LITERAL_MAP</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&#39;&quot;</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&#39;&quot;</span> <span class="k">else</span> <span class="n">s</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By The Isaac Lab Project Developers.
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022-2025, The Isaac Lab Project Developers..
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    <p class="last-updated">
+  Last updated on Apr 13, 2026.
+  <br/>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

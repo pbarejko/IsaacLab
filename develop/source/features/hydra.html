@@ -970,7 +970,7 @@ combinations early with clear error messages.</p>
 values – with a single command line argument. Instead of overriding individual
 fields, you select a named preset that <strong>completely replaces</strong> the config section
 (no field merging).</p>
-<p>Presets are declared by subclassing <code class="xref py py-class docutils literal notranslate"><span class="pre">PresetCfg</span></code>
+<p>Presets are declared by subclassing <a class="reference internal" href="../api/lab_tasks/isaaclab_tasks.utils.html#isaaclab_tasks.utils.PresetCfg" title="isaaclab_tasks.utils.hydra.PresetCfg"><code class="xref py py-class docutils literal notranslate"><span class="pre">PresetCfg</span></code></a>
 or by using the <code class="xref py py-func docutils literal notranslate"><span class="pre">preset()</span></code> convenience factory. The
 system recursively discovers all presets from nested configs automatically,
 including presets inside dict-valued fields (e.g. <code class="docutils literal notranslate"><span class="pre">actuators</span></code>).</p>
@@ -986,7 +986,7 @@ including presets inside dict-valued fields (e.g. <code class="docutils literal 
 </section>
 <section id="defining-presets-with-presetcfg">
 <h3>Defining Presets with PresetCfg<a class="headerlink" href="#defining-presets-with-presetcfg" title="Link to this heading">#</a></h3>
-<p>Create a <code class="xref py py-class docutils literal notranslate"><span class="pre">PresetCfg</span></code> subclass where each field
+<p>Create a <a class="reference internal" href="../api/lab_tasks/isaaclab_tasks.utils.html#isaaclab_tasks.utils.PresetCfg" title="isaaclab_tasks.utils.hydra.PresetCfg"><code class="xref py py-class docutils literal notranslate"><span class="pre">PresetCfg</span></code></a> subclass where each field
 is a named alternative. The <code class="docutils literal notranslate"><span class="pre">default</span></code> field is the config used when no CLI
 override is given:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_tasks.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">PresetCfg</span>
