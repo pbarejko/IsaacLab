@@ -660,6 +660,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base_frame_transformer_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseFrameTransformerData</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_newton.sensors.frame_transformer.frame_transformer_data</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">FrameTransformerData</span> <span class="k">as</span> <span class="n">NewtonFrameTransformerData</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_physx.sensors.frame_transformer</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameTransformerData</span> <span class="k">as</span> <span class="n">PhysXFrameTransformerData</span>
 
 
@@ -670,7 +673,9 @@
 
 <div class="viewcode-block" id="FrameTransformerData.__new__">
 <a class="viewcode-back" href="../../../../source/api/lab/isaaclab.sensors.html#isaaclab.sensors.FrameTransformerData.__new__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseFrameTransformerData</span> <span class="o">|</span> <span class="n">PhysXFrameTransformerData</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BaseFrameTransformerData</span> <span class="o">|</span> <span class="n">NewtonFrameTransformerData</span> <span class="o">|</span> <span class="n">PhysXFrameTransformerData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new instance of a frame transformer data based on the backend.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </div>

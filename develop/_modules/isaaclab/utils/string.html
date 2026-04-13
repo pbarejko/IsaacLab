@@ -920,7 +920,11 @@
 <div class="viewcode-block" id="resolve_matching_names">
 <a class="viewcode-back" href="../../../source/api/lab/isaaclab.utils.html#isaaclab.utils.string.resolve_matching_names">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">resolve_matching_names</span><span class="p">(</span>
-    <span class="n">keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">list_of_strings</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">preserve_order</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">keys</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">list_of_strings</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">preserve_order</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">raise_when_no_match</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Match a list of query regular expressions against a list of strings and return the matched indices and names.</span>
 
@@ -946,13 +950,15 @@
 <span class="sd">        keys: A regular expression or a list of regular expressions to match the strings in the list.</span>
 <span class="sd">        list_of_strings: A list of strings to match.</span>
 <span class="sd">        preserve_order: Whether to preserve the order of the query keys in the returned values. Defaults to False.</span>
+<span class="sd">        raise_when_no_match: Whether to raise a ``ValueError`` when not all regular expressions are matched.</span>
+<span class="sd">            Defaults to True. When False, returns empty lists instead of raising.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A tuple of lists containing the matched indices and names.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: When multiple matches are found for a string in the list.</span>
-<span class="sd">        ValueError: When not all regular expressions are matched.</span>
+<span class="sd">        ValueError: When not all regular expressions are matched and :attr:`raise_when_no_match` is True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># resolve name keys</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -1002,6 +1008,8 @@
         <span class="n">names_list</span> <span class="o">=</span> <span class="n">names_list_reorder</span>
     <span class="c1"># check that all regular expressions are matched</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">keys_match_found</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">raise_when_no_match</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[],</span> <span class="p">[]</span>
         <span class="c1"># make this print nicely aligned for debugging</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">keys_match_found</span><span class="p">):</span>
