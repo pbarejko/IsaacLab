@@ -150,26 +150,38 @@ class RigidObject(BaseRigidObject):
         # write external wrench
         if self._instantaneous_wrench_composer.active or self._permanent_wrench_composer.active:
             if self._instantaneous_wrench_composer.active:
-                # Compose instantaneous wrench with permanent wrench
-                self._instantaneous_wrench_composer.add_forces_and_torques_index(
-                    forces=self._permanent_wrench_composer.composed_force,
-                    torques=self._permanent_wrench_composer.composed_torque,
-                    body_ids=self._ALL_BODY_INDICES,
-                    env_ids=self._ALL_INDICES,
-                )
-                # Apply both instantaneous and permanent wrench to the simulation
-                self.root_view.apply_forces_and_torques_at_position(
-                    force_data=self._instantaneous_wrench_composer.composed_force.flatten().view(wp.float32),
-                    torque_data=self._instantaneous_wrench_composer.composed_torque.flatten().view(wp.float32),
-                    position_data=None,
-                    indices=self._ALL_INDICES,
-                    is_global=False,
-                )
+                composer = self._instantaneous_wrench_composer
+                composer.add_raw_buffers_from(self._permanent_wrench_composer)
             else:
-                # Apply permanent wrench to the simulation
+                composer = self._permanent_wrench_composer
+            if self._supports_global_wrench_apply:
+                # Split path: apply global and local forces separately (avoids round-trip rotation)
+                global_force_w = (wp.to_torch(composer._global_force_w) + wp.to_torch(composer._global_force_at_com_w))
+                global_torque_w = wp.to_torch(composer._global_torque_w)
+                if global_force_w.any() or global_torque_w.any():
+                    self.root_view.apply_forces_and_torques_at_position(
+                        force_data=global_force_w.view(-1, 3),
+                        torque_data=global_torque_w.view(-1, 3),
+                        position_data=None,
+                        indices=self._ALL_INDICES,
+                        is_global=True,
+                    )
+                local_force_b = wp.to_torch(composer._local_force_b)
+                local_torque_b = wp.to_torch(composer._local_torque_b)
+                if local_force_b.any() or local_torque_b.any():
+                    self.root_view.apply_forces_and_torques_at_position(
+                        force_data=local_force_b.view(-1, 3),
+                        torque_data=local_torque_b.view(-1, 3),
+                        position_data=None,
+                        indices=self._ALL_INDICES,
+                        is_global=False,
+                    )
+            else:
+                # Compose path: single body-frame call (for backends without is_global support)
+                composer.compose_to_body_frame()
                 self.root_view.apply_forces_and_torques_at_position(
-                    force_data=self._permanent_wrench_composer.composed_force.flatten().view(wp.float32),
-                    torque_data=self._permanent_wrench_composer.composed_torque.flatten().view(wp.float32),
+                    force_data=composer.out_force_b.flatten().view(wp.float32),
+                    torque_data=composer.out_torque_b.flatten().view(wp.float32),
                     position_data=None,
                     indices=self._ALL_INDICES,
                     is_global=False,
@@ -988,6 +1000,7 @@ class RigidObject(BaseRigidObject):
         # external wrench composer
         self._instantaneous_wrench_composer = WrenchComposer(self)
         self._permanent_wrench_composer = WrenchComposer(self)
+        self._supports_global_wrench_apply = True
 
         # set information about rigid body into data
         self._data.body_names = self.body_names

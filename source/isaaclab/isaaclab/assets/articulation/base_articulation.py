@@ -2560,7 +2560,13 @@ class BaseArticulation(AssetBase):
             DeprecationWarning,
             stacklevel=2,
         )
-        self.permanent_wrench_composer.set_forces_and_torques(
+        # Zero forces should deactivate the composer (matches legacy has_external_wrench = False)
+        if not (forces is not None and forces.any()) and not (torques is not None and torques.any()):
+            self.permanent_wrench_composer._active = False
+            return
+        # Reset only target env_ids then add (not set which clears all envs globally)
+        self.permanent_wrench_composer.reset(env_ids=env_ids)
+        self.permanent_wrench_composer.add_forces_and_torques(
             forces, torques, positions=positions, body_ids=body_ids, env_ids=env_ids, is_global=is_global
         )
 

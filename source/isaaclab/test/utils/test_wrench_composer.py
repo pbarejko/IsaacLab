@@ -134,8 +134,10 @@ def test_wrench_composer_add_force(device: str, num_envs: int, num_bodies: int):
             wrench_composer.add_forces_and_torques(forces=forces, body_ids=body_ids, env_ids=env_ids)
             # Add forces to hand-calculated composed force
             hand_calculated_composed_force_np[env_ids_np[:, None], body_ids_np[None, :], :] += forces_np
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
         # Get composed force from wrench composer
-        composed_force_np = wrench_composer.composed_force.numpy()
+        composed_force_np = wrench_composer.out_force_b.numpy()
         assert np.allclose(composed_force_np, hand_calculated_composed_force_np, atol=1, rtol=1e-7)
 
 
@@ -171,8 +173,10 @@ def test_wrench_composer_add_torque(device: str, num_envs: int, num_bodies: int)
             wrench_composer.add_forces_and_torques(torques=torques, body_ids=body_ids, env_ids=env_ids)
             # Add torques to hand-calculated composed torque
             hand_calculated_composed_torque_np[env_ids_np[:, None], body_ids_np[None, :], :] += torques_np
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
         # Get composed torque from wrench composer
-        composed_torque_np = wrench_composer.composed_torque.numpy()
+        composed_torque_np = wrench_composer.out_torque_b.numpy()
         assert np.allclose(composed_torque_np, hand_calculated_composed_torque_np, atol=1, rtol=1e-7)
 
 
@@ -225,11 +229,13 @@ def test_add_forces_at_positons(device: str, num_envs: int, num_bodies: int):
                 for j in range(num_bodies_np):
                     hand_calculated_composed_torque_np[env_ids_np[i], body_ids_np[j], :] += torques_from_forces[i, j, :]
 
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
         # Get composed force from wrench composer
-        composed_force_np = wrench_composer.composed_force.numpy()
+        composed_force_np = wrench_composer.out_force_b.numpy()
         assert np.allclose(composed_force_np, hand_calculated_composed_force_np, atol=1, rtol=1e-7)
         # Get composed torque from wrench composer
-        composed_torque_np = wrench_composer.composed_torque.numpy()
+        composed_torque_np = wrench_composer.out_torque_b.numpy()
         assert np.allclose(composed_torque_np, hand_calculated_composed_torque_np, atol=1, rtol=1e-7)
 
 
@@ -272,8 +278,10 @@ def test_add_torques_at_position(device: str, num_envs: int, num_bodies: int):
             )
             # Add torques to hand-calculated composed torque
             hand_calculated_composed_torque_np[env_ids_np[:, None], body_ids_np[None, :], :] += torques_np
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
         # Get composed torque from wrench composer
-        composed_torque_np = wrench_composer.composed_torque.numpy()
+        composed_torque_np = wrench_composer.out_torque_b.numpy()
         assert np.allclose(composed_torque_np, hand_calculated_composed_torque_np, atol=1, rtol=1e-7)
 
 
@@ -330,11 +338,13 @@ def test_add_forces_and_torques_at_position(device: str, num_envs: int, num_bodi
                 for j in range(num_bodies_np):
                     hand_calculated_composed_torque_np[env_ids_np[i], body_ids_np[j], :] += torques_from_forces[i, j, :]
             hand_calculated_composed_torque_np[env_ids_np[:, None], body_ids_np[None, :], :] += torques_np
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
         # Get composed force from wrench composer
-        composed_force_np = wrench_composer.composed_force.numpy()
+        composed_force_np = wrench_composer.out_force_b.numpy()
         assert np.allclose(composed_force_np, hand_calculated_composed_force_np, atol=1, rtol=1e-7)
         # Get composed torque from wrench composer
-        composed_torque_np = wrench_composer.composed_torque.numpy()
+        composed_torque_np = wrench_composer.out_torque_b.numpy()
         assert np.allclose(composed_torque_np, hand_calculated_composed_torque_np, atol=1, rtol=1e-7)
 
 
@@ -371,11 +381,15 @@ def test_wrench_composer_reset(device: str, num_envs: int, num_bodies: int):
         wrench_composer.add_forces_and_torques(forces=forces, torques=torques, body_ids=body_ids, env_ids=env_ids)
         # Reset wrench composer
         wrench_composer.reset()
-        # Get composed force and torque from wrench composer
-        composed_force_np = wrench_composer.composed_force.numpy()
-        composed_torque_np = wrench_composer.composed_torque.numpy()
-        assert np.allclose(composed_force_np, np.zeros((num_envs, num_bodies, 3)), atol=1, rtol=1e-7)
-        assert np.allclose(composed_torque_np, np.zeros((num_envs, num_bodies, 3)), atol=1, rtol=1e-7)
+        # Check all 7 buffers are zero (5 input + 2 output)
+        zeros = np.zeros((num_envs, num_bodies, 3), dtype=np.float32)
+        assert np.allclose(wrench_composer.global_force_w.numpy(), zeros, atol=1, rtol=1e-7)
+        assert np.allclose(wrench_composer.global_torque_w.numpy(), zeros, atol=1, rtol=1e-7)
+        assert np.allclose(wrench_composer.global_force_at_com_w.numpy(), zeros, atol=1, rtol=1e-7)
+        assert np.allclose(wrench_composer.local_force_b.numpy(), zeros, atol=1, rtol=1e-7)
+        assert np.allclose(wrench_composer.local_torque_b.numpy(), zeros, atol=1, rtol=1e-7)
+        assert np.allclose(wrench_composer.out_force_b.numpy(), zeros, atol=1, rtol=1e-7)
+        assert np.allclose(wrench_composer.out_torque_b.numpy(), zeros, atol=1, rtol=1e-7)
 
 
 # ============================================================================
@@ -409,8 +423,17 @@ def test_global_forces_with_rotation(device: str, num_envs: int, num_bodies: int
         # Compute expected local forces by rotating global forces by inverse quaternion
         expected_forces_local = quat_rotate_inv_np(link_quat_np, forces_global_np)
 
+        # Check raw global buffer has the global forces
+        global_force_np = wrench_composer.global_force_at_com_w.numpy()
+        assert np.allclose(global_force_np, forces_global_np, atol=1e-4, rtol=1e-5), (
+            f"Global force buffer mismatch.\nExpected:\n{forces_global_np}\nGot:\n{global_force_np}"
+        )
+
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
+
         # Verify
-        composed_force_np = wrench_composer.composed_force.numpy()
+        composed_force_np = wrench_composer.out_force_b.numpy()
         assert np.allclose(composed_force_np, expected_forces_local, atol=1e-4, rtol=1e-5), (
             f"Global force rotation failed.\nExpected:\n{expected_forces_local}\nGot:\n{composed_force_np}"
         )
@@ -442,8 +465,17 @@ def test_global_torques_with_rotation(device: str, num_envs: int, num_bodies: in
         # Compute expected local torques
         expected_torques_local = quat_rotate_inv_np(link_quat_np, torques_global_np)
 
+        # Check raw global buffer has the global torques
+        global_torque_np = wrench_composer.global_torque_w.numpy()
+        assert np.allclose(global_torque_np, torques_global_np, atol=1e-4, rtol=1e-5), (
+            f"Global torque buffer mismatch.\nExpected:\n{torques_global_np}\nGot:\n{global_torque_np}"
+        )
+
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
+
         # Verify
-        composed_torque_np = wrench_composer.composed_torque.numpy()
+        composed_torque_np = wrench_composer.out_torque_b.numpy()
         assert np.allclose(composed_torque_np, expected_torques_local, atol=1e-4, rtol=1e-5), (
             f"Global torque rotation failed.\nExpected:\n{expected_torques_local}\nGot:\n{composed_torque_np}"
         )
@@ -492,14 +524,23 @@ def test_global_forces_at_global_position(device: str, num_envs: int, num_bodies
                 # skew(pos_offset) @ force_local
                 expected_torques_local[i, j] = np.cross(pos_offset, force_local)
 
+        # Check raw global force buffer has the global forces
+        global_force_np = wrench_composer.global_force_w.numpy()
+        assert np.allclose(global_force_np, forces_global_np, atol=1e-4, rtol=1e-5), (
+            f"Global force buffer mismatch.\nExpected:\n{forces_global_np}\nGot:\n{global_force_np}"
+        )
+
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
+
         # Verify forces
-        composed_force_np = wrench_composer.composed_force.numpy()
+        composed_force_np = wrench_composer.out_force_b.numpy()
         assert np.allclose(composed_force_np, expected_forces_local, atol=1e-3, rtol=1e-4), (
             f"Global force at position failed.\nExpected forces:\n{expected_forces_local}\nGot:\n{composed_force_np}"
         )
 
         # Verify torques
-        composed_torque_np = wrench_composer.composed_torque.numpy()
+        composed_torque_np = wrench_composer.out_torque_b.numpy()
         assert np.allclose(composed_torque_np, expected_torques_local, atol=1e-3, rtol=1e-4), (
             f"Global force at position failed.\nExpected torques:\n{expected_torques_local}\nGot:\n{composed_torque_np}"
         )
@@ -530,15 +571,19 @@ def test_local_vs_global_identity_quaternion(device: str):
     # Apply as global (should be same with identity quaternion)
     wrench_composer_global.add_forces_and_torques(forces=forces, torques=torques, is_global=True)
 
+    # Compose to body frame before checking output
+    wrench_composer_local.compose_to_body_frame()
+    wrench_composer_global.compose_to_body_frame()
+
     # Results should be identical
     assert np.allclose(
-        wrench_composer_local.composed_force.numpy(),
-        wrench_composer_global.composed_force.numpy(),
+        wrench_composer_local.out_force_b.numpy(),
+        wrench_composer_global.out_force_b.numpy(),
         atol=1e-6,
     )
     assert np.allclose(
-        wrench_composer_local.composed_torque.numpy(),
-        wrench_composer_global.composed_torque.numpy(),
+        wrench_composer_local.out_torque_b.numpy(),
+        wrench_composer_global.out_torque_b.numpy(),
         atol=1e-6,
     )
 
@@ -567,7 +612,10 @@ def test_90_degree_rotation_global_force(device: str):
     # Actually, inverse rotation of +90° around Z applied to (1,0,0) gives (0,-1,0)
     expected_force_local = np.array([[[0.0, -1.0, 0.0]]], dtype=np.float32)
 
-    composed_force_np = wrench_composer.composed_force.numpy()
+    # Compose to body frame before checking output
+    wrench_composer.compose_to_body_frame()
+
+    composed_force_np = wrench_composer.out_force_b.numpy()
     assert np.allclose(composed_force_np, expected_force_local, atol=1e-5), (
         f"90-degree rotation test failed.\nExpected:\n{expected_force_local}\nGot:\n{composed_force_np}"
     )
@@ -603,7 +651,16 @@ def test_composition_mixed_local_and_global(device: str):
     global_forces_in_local = quat_rotate_inv_np(link_quat_np, forces_global_np)
     expected_total = forces_local_np + global_forces_in_local
 
-    composed_force_np = wrench_composer.composed_force.numpy()
+    # Check raw buffer properties
+    local_force_np = wrench_composer.local_force_b.numpy()
+    assert np.allclose(local_force_np, forces_local_np, atol=1e-4, rtol=1e-5)
+    global_force_at_com_np = wrench_composer.global_force_at_com_w.numpy()
+    assert np.allclose(global_force_at_com_np, forces_global_np, atol=1e-4, rtol=1e-5)
+
+    # Compose to body frame before checking output
+    wrench_composer.compose_to_body_frame()
+
+    composed_force_np = wrench_composer.out_force_b.numpy()
     assert np.allclose(composed_force_np, expected_total, atol=1e-4, rtol=1e-5), (
         f"Mixed local/global composition failed.\nExpected:\n{expected_total}\nGot:\n{composed_force_np}"
     )
@@ -639,9 +696,16 @@ def test_local_forces_at_local_position(device: str, num_envs: int, num_bodies: 
         expected_forces = forces_local_np
         expected_torques = np.cross(positions_local_np, forces_local_np)
 
+        # Check raw local buffer
+        local_force_np = wrench_composer.local_force_b.numpy()
+        assert np.allclose(local_force_np, expected_forces, atol=1e-4, rtol=1e-5)
+
+        # Compose to body frame before checking output
+        wrench_composer.compose_to_body_frame()
+
         # Verify
-        composed_force_np = wrench_composer.composed_force.numpy()
-        composed_torque_np = wrench_composer.composed_torque.numpy()
+        composed_force_np = wrench_composer.out_force_b.numpy()
+        composed_torque_np = wrench_composer.out_torque_b.numpy()
 
         assert np.allclose(composed_force_np, expected_forces, atol=1e-4, rtol=1e-5)
         assert np.allclose(composed_torque_np, expected_torques, atol=1e-4, rtol=1e-5)
@@ -676,8 +740,15 @@ def test_global_force_at_link_origin_no_torque(device: str):
     expected_forces = quat_rotate_inv_np(link_quat_np, forces_global_np)
     expected_torques = np.zeros((num_envs, num_bodies, 3), dtype=np.float32)
 
-    composed_force_np = wrench_composer.composed_force.numpy()
-    composed_torque_np = wrench_composer.composed_torque.numpy()
+    # Check raw global force buffer
+    global_force_np = wrench_composer.global_force_w.numpy()
+    assert np.allclose(global_force_np, forces_global_np, atol=1e-4, rtol=1e-5)
+
+    # Compose to body frame before checking output
+    wrench_composer.compose_to_body_frame()
+
+    composed_force_np = wrench_composer.out_force_b.numpy()
+    composed_torque_np = wrench_composer.out_torque_b.numpy()
 
     assert np.allclose(composed_force_np, expected_forces, atol=1e-4, rtol=1e-5)
     assert np.allclose(composed_torque_np, expected_torques, atol=1e-4, rtol=1e-5)
