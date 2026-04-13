@@ -712,6 +712,7 @@
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#new-isaaclab-physx-and-isaaclab-newton-extensions">New <code class="docutils literal notranslate"><span class="pre">isaaclab_physx</span></code> and <code class="docutils literal notranslate"><span class="pre">isaaclab_newton</span></code> Extensions</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#unchanged-imports">Unchanged Imports</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#new-isaaclab-newton-extension">New <code class="docutils literal notranslate"><span class="pre">isaaclab_newton</span></code> Extension</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imu-sensor-renamed-to-pva-new-lightweight-imu-sensor">IMU Sensor Renamed to PVA; New Lightweight IMU Sensor</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sensor-pose-properties-deprecation">Sensor Pose Properties Deprecation</a></li>
 </ul>
 </li>
@@ -889,15 +890,24 @@ installation steps are required.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.ContactSensor" title="isaaclab.sensors.ContactSensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContactSensor</span></code></a>, <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.ContactSensorCfg" title="isaaclab.sensors.ContactSensorCfg"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContactSensorCfg</span></code></a>, <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.ContactSensorData" title="isaaclab.sensors.ContactSensorData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContactSensorData</span></code></a></p></li>
 <li><p><a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.Imu" title="isaaclab.sensors.Imu"><code class="xref py py-class docutils literal notranslate"><span class="pre">Imu</span></code></a>, <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.ImuCfg" title="isaaclab.sensors.ImuCfg"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImuCfg</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ImuData</span></code></p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Pva</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">PvaCfg</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">PvaData</span></code></p></li>
 <li><p><a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.FrameTransformer" title="isaaclab.sensors.FrameTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTransformer</span></code></a>, <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.FrameTransformerCfg" title="isaaclab.sensors.FrameTransformerCfg"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTransformerCfg</span></code></a>, <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.FrameTransformerData" title="isaaclab.sensors.FrameTransformerData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTransformerData</span></code></a></p></li>
 </ul>
 <p>These sensor classes now use factory patterns that automatically instantiate the appropriate backend
 implementation (PhysX by default), maintaining full backward compatibility.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Imu</span></code> sensor in Isaac Lab 3.0 is <strong>not</strong> the same as the <code class="docutils literal notranslate"><span class="pre">Imu</span></code> sensor in 2.x.
+The old <code class="docutils literal notranslate"><span class="pre">Imu</span></code> (full state sensor) has been renamed to <code class="xref py py-class docutils literal notranslate"><span class="pre">Pva</span></code>.
+The new <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.Imu" title="isaaclab.sensors.Imu"><code class="xref py py-class docutils literal notranslate"><span class="pre">Imu</span></code></a> is a lightweight sensor that only provides angular velocity
+and linear acceleration. See <a class="reference internal" href="#imu-to-pva-migration"><span class="std std-ref">IMU Sensor Renamed to PVA; New Lightweight IMU Sensor</span></a> below for details.</p>
+</div>
 <p>If you need to import the PhysX sensor implementations directly (e.g., for type hints or subclassing),
 you can import from <code class="docutils literal notranslate"><span class="pre">isaaclab_physx.sensors</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Direct PhysX implementation imports</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_physx.sensors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContactSensor</span><span class="p">,</span> <span class="n">ContactSensorData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_physx.sensors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Imu</span><span class="p">,</span> <span class="n">ImuData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_physx.sensors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pva</span><span class="p">,</span> <span class="n">PvaData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_physx.sensors</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrameTransformer</span><span class="p">,</span> <span class="n">FrameTransformerData</span>
 </pre></div>
 </div>
@@ -925,10 +935,68 @@ ensuring a consistent API across backends. They use the same warp-based data con
 </pre></div>
 </div>
 </section>
+<section id="imu-sensor-renamed-to-pva-new-lightweight-imu-sensor">
+<span id="imu-to-pva-migration"></span><h3>IMU Sensor Renamed to PVA; New Lightweight IMU Sensor<a class="headerlink" href="#imu-sensor-renamed-to-pva-new-lightweight-imu-sensor" title="Link to this heading">#</a></h3>
+<p>The old <code class="docutils literal notranslate"><span class="pre">Imu</span></code> sensor has been renamed to <strong>PVA</strong> (Pose Velocity Acceleration) because it provided
+full pose, velocity, and acceleration data — far more than a real inertial measurement unit measures.
+A new lightweight <strong>IMU</strong> sensor has been introduced that only provides the two physical quantities
+a real IMU measures: angular velocity (gyroscope) and linear acceleration (accelerometer).</p>
+<p>If you were using the old <code class="docutils literal notranslate"><span class="pre">Imu</span></code> sensor, you need to decide which new sensor to use:</p>
+<ul class="simple">
+<li><p>Use <code class="xref py py-class docutils literal notranslate"><span class="pre">Pva</span></code> / <code class="xref py py-class docutils literal notranslate"><span class="pre">PvaCfg</span></code> if you need full state
+data (pose, linear velocity, angular velocity, linear and angular acceleration, projected gravity).</p></li>
+<li><p>Use <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.Imu" title="isaaclab.sensors.Imu"><code class="xref py py-class docutils literal notranslate"><span class="pre">Imu</span></code></a> / <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.ImuCfg" title="isaaclab.sensors.ImuCfg"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImuCfg</span></code></a> if you only need angular
+velocity and linear acceleration (as a real IMU provides).</p></li>
+</ul>
+<p><strong>Import changes:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before (Isaac Lab 2.x) — the old IMU provided full state</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.sensors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Imu</span><span class="p">,</span> <span class="n">ImuCfg</span><span class="p">,</span> <span class="n">ImuData</span>
+
+<span class="c1"># After (Isaac Lab 3.x) — use PVA for the same full-state sensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.sensors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pva</span><span class="p">,</span> <span class="n">PvaCfg</span><span class="p">,</span> <span class="n">PvaData</span>
+
+<span class="c1"># Or use the new lightweight IMU for angular velocity + linear acceleration only</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.sensors</span><span class="w"> </span><span class="kn">import</span> <span class="n">Imu</span><span class="p">,</span> <span class="n">ImuCfg</span><span class="p">,</span> <span class="n">ImuData</span>
+</pre></div>
+</div>
+<p><strong>Configuration changes:</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">gravity_bias</span></code> configuration parameter has been removed from both sensors:</p>
+<ul class="simple">
+<li><p><strong>PVA</strong> reports raw kinematic acceleration (no gravity contribution), as the acceleration
+is derived from finite differencing of velocities which do not include gravity.</p></li>
+<li><p><strong>IMU</strong> unconditionally includes gravity in its accelerometer readings, matching the behavior
+of a real accelerometer. The gravity vector is automatically queried from the simulation.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before (Isaac Lab 2.x)</span>
+<span class="n">imu_cfg</span> <span class="o">=</span> <span class="n">ImuCfg</span><span class="p">(</span>
+    <span class="n">prim_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{ENV_REGEX_NS}</span><span class="s2">/Robot/base&quot;</span><span class="p">,</span>
+    <span class="n">gravity_bias</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">9.81</span><span class="p">),</span>  <span class="c1"># had to be configured manually</span>
+<span class="p">)</span>
+
+<span class="c1"># After (Isaac Lab 3.x) — PVA (no gravity in acceleration)</span>
+<span class="n">pva_cfg</span> <span class="o">=</span> <span class="n">PvaCfg</span><span class="p">(</span><span class="n">prim_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{ENV_REGEX_NS}</span><span class="s2">/Robot/base&quot;</span><span class="p">)</span>
+
+<span class="c1"># After (Isaac Lab 3.x) — IMU (gravity always included automatically)</span>
+<span class="n">imu_cfg</span> <span class="o">=</span> <span class="n">ImuCfg</span><span class="p">(</span><span class="n">prim_path</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{ENV_REGEX_NS}</span><span class="s2">/Robot/base&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Observation function changes:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Before (Isaac Lab 2.x)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.envs.mdp</span><span class="w"> </span><span class="kn">import</span> <span class="n">imu_orientation</span><span class="p">,</span> <span class="n">imu_projected_gravity</span>
+
+<span class="c1"># After (Isaac Lab 3.x)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.envs.mdp</span><span class="w"> </span><span class="kn">import</span> <span class="n">pva_orientation</span><span class="p">,</span> <span class="n">pva_projected_gravity</span>
+</pre></div>
+</div>
+<p><strong>Data property changes:</strong></p>
+<p>The new <code class="docutils literal notranslate"><span class="pre">ImuData</span></code> only provides <code class="docutils literal notranslate"><span class="pre">ang_vel_b</span></code> and <code class="docutils literal notranslate"><span class="pre">lin_acc_b</span></code>. If you were accessing other
+properties (<code class="docutils literal notranslate"><span class="pre">pos_w</span></code>, <code class="docutils literal notranslate"><span class="pre">quat_w</span></code>, <code class="docutils literal notranslate"><span class="pre">lin_vel_b</span></code>, <code class="docutils literal notranslate"><span class="pre">ang_acc_b</span></code>, <code class="docutils literal notranslate"><span class="pre">projected_gravity_b</span></code>), switch
+to <code class="xref py py-class docutils literal notranslate"><span class="pre">PvaData</span></code> which provides all of them.</p>
+</section>
 <section id="sensor-pose-properties-deprecation">
 <h3>Sensor Pose Properties Deprecation<a class="headerlink" href="#sensor-pose-properties-deprecation" title="Link to this heading">#</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">pose_w</span></code>, <code class="docutils literal notranslate"><span class="pre">pos_w</span></code>, and <code class="docutils literal notranslate"><span class="pre">quat_w</span></code> properties on <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.ContactSensorData" title="isaaclab.sensors.ContactSensorData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ContactSensorData</span></code></a>
-and <code class="xref py py-class docutils literal notranslate"><span class="pre">ImuData</span></code> are deprecated and will be removed in a future release.</p>
+are deprecated and will be removed in a future release.</p>
 <p>If you need to track sensor poses in world frame, please use a dedicated sensor such as
 <a class="reference internal" href="../api/lab/isaaclab.sensors.html#isaaclab.sensors.FrameTransformer" title="isaaclab.sensors.FrameTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTransformer</span></code></a> instead.</p>
 <p><strong>Before (deprecated):</strong></p>
@@ -1567,7 +1635,7 @@ quaternions in XYZW format:</p>
 <a class="reference internal" href="../api/lab/isaaclab.assets.html#isaaclab.assets.RigidObject" title="isaaclab.assets.RigidObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">RigidObject</span></code></a>, <a class="reference internal" href="../api/lab/isaaclab.assets.html#isaaclab.assets.RigidObjectCollection" title="isaaclab.assets.RigidObjectCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">RigidObjectCollection</span></code></a>,
 <a class="reference internal" href="../api/lab_physx/isaaclab_physx.assets.html#isaaclab_physx.assets.DeformableObject" title="isaaclab_physx.assets.DeformableObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeformableObject</span></code></a>) and all sensor classes
 (<code class="xref py py-class docutils literal notranslate"><span class="pre">ContactSensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Imu</span></code>,
-<code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTransformer</span></code>).</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pva</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTransformer</span></code>).</p>
 <p>To convert back to <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code> for use with PyTorch operations, wrap the property
 access with <code class="docutils literal notranslate"><span class="pre">wp.to_torch()</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warp</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">wp</span>
@@ -1638,7 +1706,10 @@ access with <code class="docutils literal notranslate"><span class="pre">wp.to_t
 <tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Imu</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">isaaclab_physx</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTransformer</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Pva</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">isaaclab_physx</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameTransformer</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">isaaclab_physx</span></code></p></td>
 </tr>
 </tbody>
@@ -2269,6 +2340,7 @@ compatibility. These will be removed in a future release.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#new-isaaclab-physx-and-isaaclab-newton-extensions">New <code class="docutils literal notranslate"><span class="pre">isaaclab_physx</span></code> and <code class="docutils literal notranslate"><span class="pre">isaaclab_newton</span></code> Extensions</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#unchanged-imports">Unchanged Imports</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#new-isaaclab-newton-extension">New <code class="docutils literal notranslate"><span class="pre">isaaclab_newton</span></code> Extension</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#imu-sensor-renamed-to-pva-new-lightweight-imu-sensor">IMU Sensor Renamed to PVA; New Lightweight IMU Sensor</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#sensor-pose-properties-deprecation">Sensor Pose Properties Deprecation</a></li>
 </ul>
 </li>

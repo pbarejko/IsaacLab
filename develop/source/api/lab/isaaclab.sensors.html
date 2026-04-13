@@ -1143,8 +1143,6 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.update_period"><code class="docutils literal notranslate"><span class="pre">ImuCfg.update_period</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.debug_vis"><code class="docutils literal notranslate"><span class="pre">ImuCfg.debug_vis</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.offset"><code class="docutils literal notranslate"><span class="pre">ImuCfg.offset</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.visualizer_cfg"><code class="docutils literal notranslate"><span class="pre">ImuCfg.visualizer_cfg</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.gravity_bias"><code class="docutils literal notranslate"><span class="pre">ImuCfg.gravity_bias</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1201,6 +1199,10 @@ interpretation of the prim paths for different sensor types:</p>
 <td><p>Leaf exists and is a physics body (Articulation / Rigid Body)</p></td>
 </tr>
 <tr class="row-even"><td><p>Imu</p></td>
+<td><p>/World/robot/base</p></td>
+<td><p>Leaf exists and is a physics body (Rigid Body)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pva</p></td>
 <td><p>/World/robot/base</p></td>
 <td><p>Leaf exists and is a physics body (Rigid Body)</p></td>
 </tr>
@@ -5704,7 +5706,7 @@ for <code class="docutils literal notranslate"><span class="pre">distance_to_ima
 <td><p>Create a new instance of an IMU sensor based on the backend.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.sensors.Imu.__init__" title="isaaclab.sensors.Imu.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(cfg)</p></td>
-<td><p>Initializes the Imu sensor.</p></td>
+<td><p>Initializes the IMU sensor.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#isaaclab.sensors.Imu.get_registry_keys" title="isaaclab.sensors.Imu.get_registry_keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_registry_keys</span></code></a>()</p></td>
 <td><p>Returns a list of registered backend names.</p></td>
@@ -5746,7 +5748,7 @@ code snippet in your sensor implementation:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="isaaclab.sensors.Imu.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#isaaclab.sensors.ImuCfg" title="isaaclab.sensors.ImuCfg"><span class="pre">ImuCfg</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#isaaclab.sensors.Imu.__init__" title="Link to this definition">#</a></dt>
-<dd><p>Initializes the Imu sensor.</p>
+<dd><p>Initializes the IMU sensor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cfg</strong> – The configuration parameters.</p>
@@ -5836,6 +5838,10 @@ does not support debug visualization.</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">isaaclab.sensors.</span></span><span class="sig-name descname"><span class="pre">ImuCfg</span></span><a class="reference internal" href="../../../_modules/isaaclab/sensors/imu/imu_cfg.html#ImuCfg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isaaclab.sensors.ImuCfg" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#isaaclab.sensors.SensorBaseCfg" title="isaaclab.sensors.sensor_base_cfg.SensorBaseCfg"><code class="xref py py-class docutils literal notranslate"><span class="pre">SensorBaseCfg</span></code></a></p>
 <p>Configuration for an Inertial Measurement Unit (IMU) sensor.</p>
+<p>This configures a sensor that provides the two physical quantities measured by a
+real IMU: angular velocity (gyroscope) and linear acceleration (accelerometer).
+For a richer sensor that also provides pose, velocity, and angular acceleration,
+see <code class="xref py py-class docutils literal notranslate"><span class="pre">PvaCfg</span></code>.</p>
 <p><strong>Classes:</strong></p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table">
 <tbody>
@@ -5860,12 +5866,6 @@ does not support debug visualization.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.sensors.ImuCfg.offset" title="isaaclab.sensors.ImuCfg.offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset</span></code></a></p></td>
 <td><p>The offset pose of the sensor's frame from the sensor's parent frame.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#isaaclab.sensors.ImuCfg.visualizer_cfg" title="isaaclab.sensors.ImuCfg.visualizer_cfg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualizer_cfg</span></code></a></p></td>
-<td><p>The configuration object for the visualization markers.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.sensors.ImuCfg.gravity_bias" title="isaaclab.sensors.ImuCfg.gravity_bias"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gravity_bias</span></code></a></p></td>
-<td><p>The linear acceleration bias applied to the linear acceleration in the world frame (x,y,z).</p></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -5889,7 +5889,7 @@ does not support debug visualization.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="isaaclab.sensors.ImuCfg.OffsetCfg.pos">
 <span class="sig-name descname"><span class="pre">pos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#isaaclab.sensors.ImuCfg.OffsetCfg.pos" title="Link to this definition">#</a></dt>
-<dd><p>Translation w.r.t. the parent frame. Defaults to (0.0, 0.0, 0.0).</p>
+<dd><p>Translation w.r.t. the parent frame [m]. Defaults to (0.0, 0.0, 0.0).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -5928,22 +5928,6 @@ will be replaced with the environment namespace.</p>
 <dt class="sig sig-object py" id="isaaclab.sensors.ImuCfg.offset">
 <span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#isaaclab.sensors.ImuCfg.OffsetCfg" title="isaaclab.sensors.ImuCfg.OffsetCfg"><span class="pre">OffsetCfg</span></a></em><a class="headerlink" href="#isaaclab.sensors.ImuCfg.offset" title="Link to this definition">#</a></dt>
 <dd><p>The offset pose of the sensor’s frame from the sensor’s parent frame. Defaults to identity.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isaaclab.sensors.ImuCfg.visualizer_cfg">
-<span class="sig-name descname"><span class="pre">visualizer_cfg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="isaaclab.markers.html#isaaclab.markers.VisualizationMarkersCfg" title="isaaclab.markers.VisualizationMarkersCfg"><span class="pre">VisualizationMarkersCfg</span></a></em><a class="headerlink" href="#isaaclab.sensors.ImuCfg.visualizer_cfg" title="Link to this definition">#</a></dt>
-<dd><p>The configuration object for the visualization markers. Defaults to RED_ARROW_X_MARKER_CFG.</p>
-<p>This attribute is only used when debug visualization is enabled.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="isaaclab.sensors.ImuCfg.gravity_bias">
-<span class="sig-name descname"><span class="pre">gravity_bias</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#isaaclab.sensors.ImuCfg.gravity_bias" title="Link to this definition">#</a></dt>
-<dd><p>The linear acceleration bias applied to the linear acceleration in the world frame (x,y,z).</p>
-<p>Imu sensors typically output a positive gravity acceleration in opposition to the direction of gravity. This
-config parameter allows users to subtract that bias if set to (0.,0.,0.). By default this is set to (0.0,0.0,9.81)
-which results in a positive acceleration reading in the world Z.</p>
 </dd></dl>
 
 </dd></dl>
@@ -6432,8 +6416,6 @@ which results in a positive acceleration reading in the world Z.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.update_period"><code class="docutils literal notranslate"><span class="pre">ImuCfg.update_period</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.debug_vis"><code class="docutils literal notranslate"><span class="pre">ImuCfg.debug_vis</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.offset"><code class="docutils literal notranslate"><span class="pre">ImuCfg.offset</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.visualizer_cfg"><code class="docutils literal notranslate"><span class="pre">ImuCfg.visualizer_cfg</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.sensors.ImuCfg.gravity_bias"><code class="docutils literal notranslate"><span class="pre">ImuCfg.gravity_bias</span></code></a></li>
 </ul>
 </li>
 </ul>
