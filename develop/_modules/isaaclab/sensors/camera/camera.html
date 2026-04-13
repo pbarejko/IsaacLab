@@ -651,10 +651,9 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
@@ -666,9 +665,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">isaaclab.sim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sim_utils</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">isaaclab.utils.sensors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sensor_utils</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.app.settings_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_settings_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.renderers</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRenderer</span><span class="p">,</span> <span class="n">Renderer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.sim.views</span><span class="w"> </span><span class="kn">import</span> <span class="n">XformPrimView</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">has_kit</span><span class="p">,</span> <span class="n">to_camel_case</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.utils.array</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab.utils.math</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">convert_camera_frame_orientation_convention</span><span class="p">,</span>
     <span class="n">create_rotation_matrix_from_view</span><span class="p">,</span>
@@ -744,13 +743,11 @@
     <span class="p">}</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The set of sensor types that are not supported by the camera class.&quot;&quot;&quot;</span>
 
-    <span class="n">SIMPLE_SHADING_MODES</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;simple_shading_constant_diffuse&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s2">&quot;simple_shading_diffuse_mdl&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">&quot;simple_shading_full_mdl&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">SIMPLE_SHADING_TYPES</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;simple_shading_constant_diffuse&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;simple_shading_diffuse_mdl&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;simple_shading_full_mdl&quot;</span><span class="p">,</span>
     <span class="p">}</span>
-    <span class="n">SIMPLE_SHADING_AOV</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SimpleShadingSD&quot;</span>
-    <span class="n">SIMPLE_SHADING_MODE_SETTING</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/rtx/sdg/simpleShading/mode&quot;</span>
 
 <div class="viewcode-block" id="Camera.__init__">
 <a class="viewcode-back" href="../../../../source/api/lab/isaaclab.sensors.html#isaaclab.sensors.Camera.__init__">[docs]</a>
@@ -773,34 +770,6 @@
         <span class="c1"># this flag is read by SimulationContext to determine if rtx sensors should be rendered</span>
         <span class="n">settings</span> <span class="o">=</span> <span class="n">get_settings_manager</span><span class="p">()</span>
         <span class="n">settings</span><span class="o">.</span><span class="n">set_bool</span><span class="p">(</span><span class="s2">&quot;/isaaclab/render/rtx_sensors&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-
-        <span class="c1"># This is only introduced in isaac sim 6.0</span>
-        <span class="k">if</span> <span class="n">has_kit</span><span class="p">():</span>
-            <span class="n">isaac_sim_version</span> <span class="o">=</span> <span class="n">get_isaac_sim_version</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">isaac_sim_version</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">6</span><span class="p">:</span>
-                <span class="c1"># Set RTX flag to enable fast path when no regular RGB/RGBA annotators are requested</span>
-                <span class="n">needs_color_render</span> <span class="o">=</span> <span class="s2">&quot;rgb&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span> <span class="ow">or</span> <span class="s2">&quot;rgba&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">needs_color_render</span><span class="p">:</span>
-                    <span class="n">settings</span><span class="o">.</span><span class="n">set_bool</span><span class="p">(</span><span class="s2">&quot;/rtx/sdg/force/disableColorRender&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-
-                <span class="c1"># If we have GUI / viewport enabled, we turn off fast path so that the viewport is not black</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/isaaclab/has_gui&quot;</span><span class="p">):</span>
-                    <span class="n">settings</span><span class="o">.</span><span class="n">set_bool</span><span class="p">(</span><span class="s2">&quot;/rtx/sdg/force/disableColorRender&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="s2">&quot;albedo&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="s2">&quot;Albedo annotator is only supported in Isaac Sim 6.0+. The albedo data type will be ignored.&quot;</span>
-                    <span class="p">)</span>
-                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">data_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_MODES</span> <span class="k">for</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                        <span class="s2">&quot;Simple shading annotators are only supported in Isaac Sim 6.0+. The simple shading data types&quot;</span>
-                        <span class="s2">&quot; will be ignored.&quot;</span>
-                    <span class="p">)</span>
-
-        <span class="c1"># Set simple shading mode (if requested) before rendering</span>
-        <span class="n">simple_shading_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_simple_shading_mode</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">simple_shading_mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">settings</span><span class="o">.</span><span class="n">set_int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_MODE_SETTING</span><span class="p">,</span> <span class="n">simple_shading_mode</span><span class="p">)</span>
 
         <span class="c1"># spawn the asset</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">spawn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -837,6 +806,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_prims</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">UsdGeom</span><span class="o">.</span><span class="n">Camera</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="c1"># Create empty variables for storing output data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">CameraData</span><span class="p">()</span>
+        <span class="c1"># Renderer and render data — assigned in _initialize_impl.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="p">:</span> <span class="n">BaseRenderer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_render_data</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">has_kit</span><span class="p">():</span>
             <span class="k">return</span>
@@ -856,14 +828,12 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unsubscribes from callbacks and detach from the replicator registry.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unsubscribes from callbacks and cleans up renderer resources.&quot;&quot;&quot;</span>
         <span class="c1"># unsubscribe callbacks</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__del__</span><span class="p">()</span>
-        <span class="c1"># delete from replicator registry</span>
-        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">annotators</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rep_registry</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">for</span> <span class="n">annotator</span><span class="p">,</span> <span class="n">render_product_path</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">annotators</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_product_paths</span><span class="p">):</span>
-                <span class="n">annotator</span><span class="o">.</span><span class="n">detach</span><span class="p">([</span><span class="n">render_product_path</span><span class="p">])</span>
-                <span class="n">annotator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># cleanup render resources (renderer may be None if never initialized)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_render_data</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns: A string containing information about the instance.&quot;&quot;&quot;</span>
@@ -899,14 +869,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Frame number when the measurement took place.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">render_product_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The path of the render products for the cameras.</span>
-
-<span class="sd">        This can be used via replicator interfaces to attach to writes or external annotator registry.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_product_paths</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">image_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
@@ -1091,12 +1053,13 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_impl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the sensor handles and internal buffers.</span>
 
-<span class="sd">        This function creates handles and registers the provided data types with the replicator registry to</span>
-<span class="sd">        be able to access the data from the sensor. It also initializes the internal buffers to store the data.</span>
+<span class="sd">        This function creates a :class:`~isaaclab.renderers.Renderer` from the configured</span>
+<span class="sd">        :attr:`~isaaclab.sensors.camera.CameraCfg.renderer_cfg` and delegates all render-product</span>
+<span class="sd">        and annotator management to it. It also initializes the internal buffers to store the data.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            RuntimeError: If the number of camera prims in the view does not match the number of environments.</span>
-<span class="sd">            RuntimeError: If replicator was not found.</span>
+<span class="sd">            RuntimeError: If cameras are not enabled (missing ``--enable_cameras`` flag).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">renderer_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">renderer_cfg</span><span class="p">,</span> <span class="s2">&quot;renderer_type&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span>
         <span class="n">needs_kit_cameras</span> <span class="o">=</span> <span class="n">renderer_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;isaac_rtx&quot;</span><span class="p">)</span>
@@ -1106,12 +1069,18 @@
                 <span class="s2">&quot; rendering.&quot;</span>
             <span class="p">)</span>
 
-        <span class="kn">import</span><span class="w"> </span><span class="nn">omni.replicator.core</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">rep</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">omni.syntheticdata.scripts.SyntheticData</span><span class="w"> </span><span class="kn">import</span> <span class="n">SyntheticData</span>
-
         <span class="c1"># Initialize parent class</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_initialize_impl</span><span class="p">()</span>
-        <span class="c1"># Create a view for the sensor with Fabric enabled for fast pose queries, otherwise position will be stale.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span> <span class="o">=</span> <span class="n">Renderer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">renderer_cfg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Using renderer: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="c1"># Stage preprocessing must happen before creating the view because the view keeps</span>
+        <span class="c1"># references to prims located in the stage.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">prepare_stage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stage</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_envs</span><span class="p">)</span>
+
+        <span class="c1"># Create a view for the sensor with Fabric enabled for fast pose queries.</span>
+        <span class="c1"># TODO: remove sync_usd_on_fabric_write=True once the GPU Fabric sync bug is fixed.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_view</span> <span class="o">=</span> <span class="n">XformPrimView</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">prim_path</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stage</span><span class="p">,</span> <span class="n">sync_usd_on_fabric_write</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
@@ -1127,10 +1096,6 @@
         <span class="c1"># Create frame count buffer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
 
-        <span class="c1"># Attach the sensor data types to render node</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_render_product_paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rep_registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">rep</span><span class="o">.</span><span class="n">annotators</span><span class="o">.</span><span class="n">Annotator</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">}</span>
-
         <span class="c1"># Convert all encapsulated prims to Camera</span>
         <span class="k">for</span> <span class="n">cam_prim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">prims</span><span class="p">:</span>
             <span class="c1"># Obtain the prim path</span>
@@ -1139,84 +1104,13 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">cam_prim</span><span class="o">.</span><span class="n">IsA</span><span class="p">(</span><span class="n">UsdGeom</span><span class="o">.</span><span class="n">Camera</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prim at path &#39;</span><span class="si">{</span><span class="n">cam_prim_path</span><span class="si">}</span><span class="s2">&#39; is not a Camera.&quot;</span><span class="p">)</span>
             <span class="c1"># Add to list</span>
-            <span class="n">sensor_prim</span> <span class="o">=</span> <span class="n">UsdGeom</span><span class="o">.</span><span class="n">Camera</span><span class="p">(</span><span class="n">cam_prim</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_prims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sensor_prim</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sensor_prims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">UsdGeom</span><span class="o">.</span><span class="n">Camera</span><span class="p">(</span><span class="n">cam_prim</span><span class="p">))</span>
 
-            <span class="c1"># Get render product</span>
-            <span class="c1"># From Isaac Sim 2023.1 onwards, render product is a HydraTexture so we need to extract the path</span>
-            <span class="n">render_prod_path</span> <span class="o">=</span> <span class="n">rep</span><span class="o">.</span><span class="n">create</span><span class="o">.</span><span class="n">render_product</span><span class="p">(</span><span class="n">cam_prim_path</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">render_prod_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">render_prod_path</span> <span class="o">=</span> <span class="n">render_prod_path</span><span class="o">.</span><span class="n">path</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_render_product_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">render_prod_path</span><span class="p">)</span>
+        <span class="c1"># View needs to exist before creating render data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_render_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">create_render_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-            <span class="c1"># Check if semantic types or semantic filter predicate is provided</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">semantic_filter</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">semantic_filter_predicate</span> <span class="o">=</span> <span class="s2">&quot;:*; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">semantic_filter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;:*&quot;</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">semantic_filter</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="n">semantic_filter_predicate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">semantic_filter</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Semantic types must be a list or a string. Received: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">semantic_filter</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-            <span class="c1"># set the semantic filter predicate</span>
-            <span class="c1"># copied from rep.scripts.writes_default.basic_writer.py</span>
-            <span class="n">SyntheticData</span><span class="o">.</span><span class="n">Get</span><span class="p">()</span><span class="o">.</span><span class="n">set_instance_mapping_semantic_filter</span><span class="p">(</span><span class="n">semantic_filter_predicate</span><span class="p">)</span>
-
-            <span class="c1"># Iterate over each data type and create annotator</span>
-            <span class="c1"># TODO: This will move out of the loop once Replicator supports multiple render products within a single</span>
-            <span class="c1">#  annotator, i.e.: rep_annotator.attach(self._render_product_paths)</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
-                <span class="c1"># note: we are verbose here to make it easier to understand the code.</span>
-                <span class="c1">#   if colorize is true, the data is mapped to colors and a uint8 4 channel image is returned.</span>
-                <span class="c1">#   if colorize is false, the data is returned as a uint32 image with ids as values.</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;semantic_segmentation&quot;</span><span class="p">:</span>
-                    <span class="n">init_params</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="s2">&quot;colorize&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_semantic_segmentation</span><span class="p">,</span>
-                        <span class="s2">&quot;mapping&quot;</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">semantic_segmentation_mapping</span><span class="p">),</span>
-                    <span class="p">}</span>
-                <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;instance_segmentation_fast&quot;</span><span class="p">:</span>
-                    <span class="n">init_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;colorize&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_instance_segmentation</span><span class="p">}</span>
-                <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;instance_id_segmentation_fast&quot;</span><span class="p">:</span>
-                    <span class="n">init_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;colorize&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_instance_id_segmentation</span><span class="p">}</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">init_params</span> <span class="o">=</span> <span class="kc">None</span>
-
-                <span class="c1"># Resolve device name</span>
-                <span class="k">if</span> <span class="s2">&quot;cuda&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">:</span>
-                    <span class="n">device_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">device_name</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
-
-                <span class="c1"># TODO: this is a temporary solution because replicator has not exposed the annotator yet</span>
-                <span class="c1"># once it&#39;s exposed, we can remove this</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;albedo&quot;</span><span class="p">:</span>
-                    <span class="n">rep</span><span class="o">.</span><span class="n">AnnotatorRegistry</span><span class="o">.</span><span class="n">register_annotator_from_aov</span><span class="p">(</span>
-                        <span class="n">aov</span><span class="o">=</span><span class="s2">&quot;DiffuseAlbedoSD&quot;</span><span class="p">,</span> <span class="n">output_data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span> <span class="n">output_channels</span><span class="o">=</span><span class="mi">4</span>
-                    <span class="p">)</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_MODES</span><span class="p">:</span>
-                    <span class="n">rep</span><span class="o">.</span><span class="n">AnnotatorRegistry</span><span class="o">.</span><span class="n">register_annotator_from_aov</span><span class="p">(</span>
-                        <span class="n">aov</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_AOV</span><span class="p">,</span> <span class="n">output_data_type</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span> <span class="n">output_channels</span><span class="o">=</span><span class="mi">4</span>
-                    <span class="p">)</span>
-
-                <span class="c1"># Map special cases to their corresponding annotator names</span>
-                <span class="n">simple_shading_cases</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_AOV</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_MODES</span><span class="p">}</span>
-                <span class="n">special_cases</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;rgba&quot;</span><span class="p">:</span> <span class="s2">&quot;rgb&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;depth&quot;</span><span class="p">:</span> <span class="s2">&quot;distance_to_image_plane&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;albedo&quot;</span><span class="p">:</span> <span class="s2">&quot;DiffuseAlbedoSD&quot;</span><span class="p">,</span>
-                    <span class="o">**</span><span class="n">simple_shading_cases</span><span class="p">,</span>
-                <span class="p">}</span>
-                <span class="c1"># Get the annotator name, falling back to the original name if not a special case</span>
-                <span class="n">annotator_name</span> <span class="o">=</span> <span class="n">special_cases</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-                <span class="c1"># Create the annotator node</span>
-                <span class="n">rep_annotator</span> <span class="o">=</span> <span class="n">rep</span><span class="o">.</span><span class="n">AnnotatorRegistry</span><span class="o">.</span><span class="n">get_annotator</span><span class="p">(</span><span class="n">annotator_name</span><span class="p">,</span> <span class="n">init_params</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device_name</span><span class="p">)</span>
-
-                <span class="c1"># attach annotator to render product</span>
-                <span class="n">rep_annotator</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">render_prod_path</span><span class="p">)</span>
-                <span class="c1"># add to registry</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_rep_registry</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rep_annotator</span><span class="p">)</span>
-
-        <span class="c1"># Create internal buffers</span>
+        <span class="c1"># Create internal buffers (includes intrinsic matrix and pose init)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_buffers</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update_intrinsic_matrices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ALL_INDICES</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_buffers_impl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_mask</span><span class="p">:</span> <span class="n">wp</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
         <span class="n">env_ids</span> <span class="o">=</span> <span class="n">wp</span><span class="o">.</span><span class="n">to_torch</span><span class="p">(</span><span class="n">env_mask</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">as_tuple</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -1224,50 +1118,14 @@
             <span class="k">return</span>
         <span class="c1"># Increment frame count</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_frame</span><span class="p">[</span><span class="n">env_ids</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="c1"># -- pose</span>
+        <span class="c1"># update latest camera pose if requested</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">update_latest_camera_pose</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_poses</span><span class="p">(</span><span class="n">env_ids</span><span class="p">)</span>
-        <span class="c1"># Ensure the RTX renderer has been pumped so annotator buffers are fresh.</span>
-        <span class="c1"># Lazy import Isaac RTX Renderer dependency.</span>
-        <span class="c1"># For now the Camera implementation works only with Isaac RTX Renderer.</span>
-        <span class="c1"># Future consideration should be to move Renderer from TiledCamera up the hierarchy to Camera</span>
-        <span class="c1"># to make the Camera backend-agnostic.</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">isaaclab_physx.renderers.isaac_rtx_renderer_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_isaac_rtx_render_update</span>
 
-        <span class="n">ensure_isaac_rtx_render_update</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">update_transforms</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_render_data</span><span class="p">)</span>
 
-        <span class="c1"># -- read the data from annotator registry</span>
-        <span class="c1"># check if buffer is called for the first time. If so then, allocate the memory</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># this is the first time buffer is called</span>
-            <span class="c1"># it allocates memory for all the sensors</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_create_annotator_data</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># iterate over all the data types</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">annotators</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rep_registry</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="c1"># iterate over all the annotators</span>
-                <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">env_ids</span><span class="p">:</span>
-                    <span class="c1"># get the output</span>
-                    <span class="n">output</span> <span class="o">=</span> <span class="n">annotators</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
-                    <span class="c1"># process the output</span>
-                    <span class="n">data</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_annotator_output</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-                    <span class="c1"># add data to output</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
-                    <span class="c1"># add info to output</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span>
-                <span class="c1"># NOTE: The `distance_to_camera` annotator returns the distance to the camera optical center. However,</span>
-                <span class="c1">#       the replicator depth clipping is applied w.r.t. to the image plane which may result in values</span>
-                <span class="c1">#       larger than the clipping range in the output. We apply an additional clipping to ensure values</span>
-                <span class="c1">#       are within the clipping range for all the annotators.</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;distance_to_camera&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">spawn</span><span class="o">.</span><span class="n">clipping_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">inf</span>
-                <span class="c1"># apply defined clipping behavior</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;distance_to_camera&quot;</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;distance_to_image_plane&quot;</span>
-                <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">depth_clipping_behavior</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">torch</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">])]</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="mf">0.0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">depth_clipping_behavior</span> <span class="o">==</span> <span class="s2">&quot;zero&quot;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">spawn</span><span class="o">.</span><span class="n">clipping_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                    <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">read_output</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_render_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Private Helpers</span>
@@ -1295,19 +1153,82 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_create_buffers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create buffers for storing data.&quot;&quot;&quot;</span>
-        <span class="c1"># create the data object</span>
+        <span class="c1"># -- intrinsic matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">intrinsic_matrices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_intrinsic_matrices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ALL_INDICES</span><span class="p">)</span>
         <span class="c1"># -- pose of the cameras</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">pos_w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">quat_w_world</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">)</span>
-        <span class="c1"># -- intrinsic matrix</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">intrinsic_matrices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_poses</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ALL_INDICES</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">image_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_shape</span>
-        <span class="c1"># -- output data</span>
-        <span class="c1"># lazy allocation of data dictionary</span>
-        <span class="c1"># since the size of the output data is not known in advance, we leave it as None</span>
-        <span class="c1"># the memory will be allocated when the buffer() function is called for the first time.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">[{</span><span class="n">name</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">}</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">)]</span>
+        <span class="c1"># -- output data (eagerly pre-allocated so renderer.set_outputs() can hold tensor references)</span>
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;rgba&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span> <span class="ow">or</span> <span class="s2">&quot;rgb&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;rgba&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;rgb&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;rgb&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;rgba&quot;</span><span class="p">][</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;albedo&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;albedo&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_TYPES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="n">data_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;distance_to_image_plane&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;distance_to_image_plane&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;depth&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;depth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;distance_to_camera&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;distance_to_camera&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;normals&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;normals&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;motion_vectors&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;motion_vectors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;semantic_segmentation&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_semantic_segmentation</span><span class="p">:</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;semantic_segmentation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;semantic_segmentation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;instance_segmentation_fast&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_instance_segmentation</span><span class="p">:</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;instance_segmentation_fast&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;instance_segmentation_fast&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;instance_id_segmentation_fast&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_instance_id_segmentation</span><span class="p">:</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;instance_id_segmentation_fast&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;instance_id_segmentation_fast&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_view</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">data_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">set_outputs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_render_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_intrinsic_matrices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_ids</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute camera&#39;s matrix of intrinsic parameters.</span>
@@ -1360,107 +1281,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">quat_w_world</span><span class="p">[</span><span class="n">env_ids</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_camera_frame_orientation_convention</span><span class="p">(</span>
             <span class="n">quat</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s2">&quot;opengl&quot;</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;world&quot;</span>
         <span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_create_annotator_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the buffers to store the annotator data.</span>
-
-<span class="sd">        We create a buffer for each annotator and store the data in a dictionary. Since the data</span>
-<span class="sd">        shape is not known beforehand, we create a list of buffers and concatenate them later.</span>
-
-<span class="sd">        This is an expensive operation and should be called only once.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># add data from the annotators</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">annotators</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rep_registry</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># create a list to store the data for each annotator</span>
-            <span class="n">data_all_cameras</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-            <span class="c1"># iterate over all the annotators</span>
-            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ALL_INDICES</span><span class="p">:</span>
-                <span class="c1"># get the output</span>
-                <span class="n">output</span> <span class="o">=</span> <span class="n">annotators</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
-                <span class="c1"># process the output</span>
-                <span class="n">data</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_annotator_output</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-                <span class="c1"># append the data</span>
-                <span class="n">data_all_cameras</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                <span class="c1"># store the info</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span>
-            <span class="c1"># concatenate the data along the batch dimension</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">data_all_cameras</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="c1"># NOTE: `distance_to_camera` and `distance_to_image_plane` are not both clipped to the maximum defined</span>
-            <span class="c1">#       in the clipping range. The clipping is applied only to `distance_to_image_plane` and then both</span>
-            <span class="c1">#       outputs are only clipped where the values in `distance_to_image_plane` exceed the threshold. To</span>
-            <span class="c1">#       have a unified behavior between all cameras, we clip both outputs to the maximum value defined.</span>
-            <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;distance_to_camera&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">spawn</span><span class="o">.</span><span class="n">clipping_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">inf</span>
-            <span class="c1"># clip the data if needed</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;distance_to_camera&quot;</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;distance_to_image_plane&quot;</span>
-            <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">depth_clipping_behavior</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">torch</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">output</span><span class="p">[</span><span class="n">name</span><span class="p">])]</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="mf">0.0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">depth_clipping_behavior</span> <span class="o">==</span> <span class="s2">&quot;zero&quot;</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">spawn</span><span class="o">.</span><span class="n">clipping_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_process_annotator_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process the annotator output.</span>
-
-<span class="sd">        This function is called after the data has been collected from all the cameras.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># extract info and data from the output</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">output</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="c1"># convert data into torch tensor</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">convert_to_torch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-
-        <span class="c1"># process data for different segmentation types</span>
-        <span class="c1"># Note: Replicator returns raw buffers of dtype int32 for segmentation types</span>
-        <span class="c1">#   so we need to convert them to uint8 4 channel images for colorized types</span>
-        <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_shape</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;semantic_segmentation&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_semantic_segmentation</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;instance_segmentation_fast&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_instance_segmentation</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;instance_id_segmentation_fast&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">colorize_instance_id_segmentation</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># make sure buffer dimensions are consistent as (H, W, C)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;distance_to_camera&quot;</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;distance_to_image_plane&quot;</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;depth&quot;</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="c1"># we only return the RGB channels from the RGBA output if rgb is required</span>
-        <span class="c1"># normals return (x, y, z) in first 3 channels, 4th channel is unused</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;rgb&quot;</span> <span class="ow">or</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;normals&quot;</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-        <span class="c1"># motion vectors return (x, y) in first 2 channels, 3rd and 4th channels are unused</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;motion_vectors&quot;</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_MODES</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-
-        <span class="c1"># return the data and info</span>
-        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">info</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_simple_shading_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve the requested simple shading mode from data types.&quot;&quot;&quot;</span>
-        <span class="n">requested</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_type</span> <span class="k">for</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">data_types</span> <span class="k">if</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_MODES</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">requested</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">requested</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Multiple simple shading modes requested (</span><span class="si">%s</span><span class="s2">). Using &#39;</span><span class="si">%s</span><span class="s2">&#39; only.&quot;</span><span class="p">,</span>
-                <span class="n">requested</span><span class="p">,</span>
-                <span class="n">requested</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="c1"># notify renderer of updated poses (guarded in case called before initialization completes)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_render_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_renderer</span><span class="o">.</span><span class="n">update_camera</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_render_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">pos_w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">quat_w_world</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">intrinsic_matrices</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIMPLE_SHADING_MODES</span><span class="p">[</span><span class="n">requested</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Internal simulation callbacks.</span>

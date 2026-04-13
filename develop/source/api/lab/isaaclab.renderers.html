@@ -715,7 +715,7 @@
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.update_transforms"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.update_transforms()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.update_camera"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.update_camera()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.render"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.render()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.write_output"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.write_output()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.read_output"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.read_output()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.cleanup"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.cleanup()</span></code></a></li>
 </ul>
 </li>
@@ -791,8 +791,8 @@ different renderer backends that can be used with Isaac Lab.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.renderers.BaseRenderer.render" title="isaaclab.renderers.BaseRenderer.render"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code></a>(render_data)</p></td>
 <td><p>Perform rendering and write to output buffers.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#isaaclab.renderers.BaseRenderer.write_output" title="isaaclab.renderers.BaseRenderer.write_output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_output</span></code></a>(render_data, output_name, ...)</p></td>
-<td><p>Write a specific output type to the given buffer.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#isaaclab.renderers.BaseRenderer.read_output" title="isaaclab.renderers.BaseRenderer.read_output"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_output</span></code></a>(render_data, camera_data)</p></td>
+<td><p>Read rendered outputs from the renderer into the camera data container.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#isaaclab.renderers.BaseRenderer.cleanup" title="isaaclab.renderers.BaseRenderer.cleanup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cleanup</span></code></a>(render_data)</p></td>
 <td><p>Release renderer resources associated with the given render data.</p></td>
@@ -885,15 +885,15 @@ to pre-allocated tensors where rendered data will be written.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="isaaclab.renderers.BaseRenderer.write_output">
-<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">write_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">render_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.11)"><span class="pre">torch.Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/isaaclab/renderers/base_renderer.html#BaseRenderer.write_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isaaclab.renderers.BaseRenderer.write_output" title="Link to this definition">#</a></dt>
-<dd><p>Write a specific output type to the given buffer.</p>
+<dt class="sig sig-object py" id="isaaclab.renderers.BaseRenderer.read_output">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">render_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="isaaclab.sensors.html#isaaclab.sensors.CameraData" title="isaaclab.sensors.CameraData"><span class="pre">CameraData</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/isaaclab/renderers/base_renderer.html#BaseRenderer.read_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#isaaclab.renderers.BaseRenderer.read_output" title="Link to this definition">#</a></dt>
+<dd><p>Read rendered outputs from the renderer into the camera data container.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>render_data</strong> – The render data object from <a class="reference internal" href="#isaaclab.renderers.BaseRenderer.create_render_data" title="isaaclab.renderers.BaseRenderer.create_render_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_render_data()</span></code></a>.</p></li>
-<li><p><strong>output_name</strong> – Name of the output (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;rgba&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;depth&quot;</span></code>).</p></li>
-<li><p><strong>output_data</strong> – Pre-allocated tensor to write the output into.</p></li>
+<li><p><strong>camera_data</strong> – The <a class="reference internal" href="isaaclab.sensors.html#isaaclab.sensors.CameraData" title="isaaclab.sensors.camera.camera_data.CameraData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CameraData</span></code></a>
+instance to populate.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1005,7 +1005,7 @@ to pre-allocated tensors where rendered data will be written.</p></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.update_transforms"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.update_transforms()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.update_camera"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.update_camera()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.render"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.render()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.write_output"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.write_output()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.read_output"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.read_output()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#isaaclab.renderers.BaseRenderer.cleanup"><code class="docutils literal notranslate"><span class="pre">BaseRenderer.cleanup()</span></code></a></li>
 </ul>
 </li>
