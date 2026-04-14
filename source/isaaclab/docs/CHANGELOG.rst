@@ -1,6 +1,21 @@
 Changelog
 ---------
 
+4.6.2 (2026-04-14)
+~~~~~~~~~~~~~~~~~~
+
+Added
+^^^^^
+
+* Added :func:`~isaaclab.sim.utils.bake_display_colors_from_materials` to
+  extract diffuse colours from bound materials (OmniPBR, OmniSurface,
+  UsdPreviewSurface) and author them as ``primvars:displayColor`` on geometry
+  prims. This is a runtime workaround for render backends (e.g. Newton Warp)
+  that read ``displayColor`` but do not yet evaluate full material networks.
+  The bake runs automatically on the template before environment cloning when
+  the Newton physics backend or a Newton-based renderer is active.
+
+
 4.6.1 (2026-04-14)
 ~~~~~~~~~~~~~~~~~~
 

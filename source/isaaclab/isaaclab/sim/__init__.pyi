@@ -164,6 +164,7 @@ __all__ = [
     "resolve_prim_pose",
     "resolve_prim_scale",
     "convert_world_pose_to_local",
+    "bake_display_colors_from_materials",
     "XformPrimView",
 ]
 
@@ -332,5 +333,6 @@ from .utils import (
     resolve_prim_pose,
     resolve_prim_scale,
     convert_world_pose_to_local,
+    bake_display_colors_from_materials,
 )
 from .views import XformPrimView

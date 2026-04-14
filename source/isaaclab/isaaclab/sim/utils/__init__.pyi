@@ -57,6 +57,7 @@ __all__ = [
     "resolve_prim_pose",
     "resolve_prim_scale",
     "convert_world_pose_to_local",
+    "bake_display_colors_from_materials",
 ]
 
 from .legacy import (
@@ -116,6 +117,9 @@ from .stage import (
     clear_stage,
     get_current_stage,
     get_current_stage_id,
+)
+from .display_color import (
+    bake_display_colors_from_materials,
 )
 from .transforms import (
     standardize_xform_ops,

@@ -204,6 +204,12 @@ class InteractiveScene:
             self.cloner_cfg.visualizer_clone_fn = visualizer_clone_fn
 
         if has_scene_cfg_entities:
+            # Newton Warp does not evaluate full material networks yet.
+            # Bake diffuse colours from bound materials into primvars:displayColor
+            # on the template *before* cloning so every env copy inherits them.
+            if "newton" in self.physics_backend or requirements.requires_newton_model:
+                sim_utils.bake_display_colors_from_materials(self.cloner_cfg.template_root, stage=self.stage)
+
             self.clone_environments(copy_from_source=(not self.cfg.replicate_physics))
             # Collision filtering is PhysX-specific (PhysxSchema.PhysxSceneAPI)
             if self.cfg.filter_collisions and "physx" in self.physics_backend:
