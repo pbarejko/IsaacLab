@@ -255,14 +255,28 @@ class OvPhysxManager(PhysicsManager):
         logger.info("OvPhysxManager: loaded USD into ovphysx (device=%s)", ovphysx_device)
 
         # Replay pending physics clones registered by ovphysx_replicate().
-        # The USD stage contains only env_0's physics; env_1..N are empty
-        # Xform containers.  physx.clone() creates the remaining environments
-        # in the physics runtime without modifying the USD file.
+        # ovphysx 0.4.3 removed the public `physx.clone()` API in favor of
+        # `physx.attach_stage(stage)` + `ovstage_clone_subtree(...)`.  Until
+        # that ovstage bridge is wired into IsaacLab (see
+        # source/isaaclab_ov/docs/ovphysx_coexist_DESIGN.md item C),
+        # InteractiveScene routes ovphysx through USD-side cloning instead
+        # (clone_usd=True), and `_pending_clones` should always be empty
+        # under that path.  Defensive branch: if the older `clone_usd=False`
+        # path were re-enabled and pre-0.4.3 wheels are in use, fall back
+        # to the legacy entrypoint; on 0.4.3+ surface a clear error
+        # pointing at the design note rather than letting the
+        # AttributeError bubble through Camera _initialize_impl.
         if cls._pending_clones:
-            # ovphysx_replicate() only registers pending clones when clone_usd=False,
-            # meaning the USD contains only env_0 physics and physx.clone() is required
-            # to populate env_1..N in the physics runtime.  Execute unconditionally —
-            # no USD content heuristic is needed.
+            if not hasattr(cls._physx, "clone"):
+                raise RuntimeError(
+                    "OvPhysxManager: ovphysx_replicate() registered pending physics clones, "
+                    f"but the loaded ovphysx wheel ({type(cls._physx).__module__}) no longer "
+                    "exposes `physx.clone()`. ovphysx 0.4.3+ replaced it with "
+                    "`physx.attach_stage(stage)` + `ovstage_clone_subtree(...)`. Either set "
+                    "`InteractiveSceneCfg.replicate_physics=False` (USD-side cloning) or land "
+                    "the ovstage bridge migration described in "
+                    "source/isaaclab_ov/docs/ovphysx_coexist_DESIGN.md."
+                )
             for source, targets, parent_positions in cls._pending_clones:
                 logger.info(
                     "OvPhysxManager: cloning %s -> %d targets (%s ... %s)",

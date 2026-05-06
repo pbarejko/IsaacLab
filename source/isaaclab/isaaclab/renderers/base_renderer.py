@@ -33,6 +33,21 @@ class BaseRenderer(ABC):
         """
         pass
 
+    def early_init(self) -> None:
+        """Construct any native objects that must be initialized before the
+        physics backend.
+
+        Default no-op. Override in renderers whose native runtime must claim
+        process-global resources (e.g. Carbonite framework) before another
+        co-loaded library does. Called from
+        :meth:`RenderContext.early_init_all` ahead of the first
+        :meth:`PhysicsManager.reset` so the renderer can establish ownership
+        before the physics backend constructs its own native instance.
+
+        Idempotent: callers may invoke this multiple times; subsequent calls
+        on a renderer that has already done its early init must no-op.
+        """
+
     @abstractmethod
     def prepare_stage(self, stage: Any, num_envs: int) -> None:
         """Prepare the stage for rendering before :meth:`create_render_data` is called.

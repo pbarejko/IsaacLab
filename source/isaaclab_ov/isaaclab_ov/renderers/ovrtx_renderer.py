@@ -147,6 +147,7 @@ class OVRTXRenderer(BaseRenderer):
 
     def __init__(self, cfg: OVRTXRendererCfg):
         self.cfg = cfg
+        self._renderer: Renderer | None = None
         self._usd_handles = []
         self._render_product_paths = []
         self._camera_binding = None
@@ -156,6 +157,30 @@ class OVRTXRenderer(BaseRenderer):
         self._exported_usd_path: str | None = None
         self._camera_rel_path: str | None = None
         self._output_semantic_color_buffer: wp.array | None = None
+
+    def early_init(self) -> None:
+        """Construct the OVRTX :class:`Renderer` to claim Carbonite ahead of
+        the physics backend.
+
+        ovrtx and ovphysx share a Carbonite framework; the ovrtx side does no
+        coexistence checks at construction time and SIGSEGVs inside
+        ``createRTXRenderer`` if ovphysx (or any other Carbonite owner) has
+        already loaded its plugins. Pre-constructing here lets ovrtx own
+        Carbonite first; ovphysx's 0.4.3 coexistence-default-flip then takes
+        the second-tenant path cleanly.
+
+        Idempotent — subsequent calls are a no-op.
+        """
+        if self._renderer is not None:
+            return
+        logger.info("OVRTXRenderer.early_init: constructing Renderer to claim Carbonite first")
+        ovrtx_config = RendererConfig(
+            log_file_path=self.cfg.log_file_path,
+            log_level=self.cfg.log_level,
+            read_gpu_transforms=_IS_OVRTX_0_3_0_OR_NEWER,
+        )
+        self._renderer = Renderer(ovrtx_config)
+        assert self._renderer, "Renderer should be valid after construction"
 
     def prepare_stage(self, stage: Any, num_envs: int) -> None:
         """Export the USD stage for OVRTX before create_render_data.
@@ -196,15 +221,18 @@ class OVRTXRenderer(BaseRenderer):
         usd_scene_path = self._exported_usd_path
         use_cloning = self.cfg.use_cloning
 
-        logger.info("Creating OVRTX renderer...")
-        OVRTX_CONFIG = RendererConfig(
-            log_file_path=self.cfg.log_file_path,
-            log_level=self.cfg.log_level,
-            read_gpu_transforms=_IS_OVRTX_0_3_0_OR_NEWER,
-        )
-        self._renderer = Renderer(OVRTX_CONFIG)
-        assert self._renderer, "Renderer should be valid after creation"
-        logger.info("OVRTX renderer created successfully")
+        if self._renderer is None:
+            logger.info("Creating OVRTX renderer...")
+            ovrtx_config = RendererConfig(
+                log_file_path=self.cfg.log_file_path,
+                log_level=self.cfg.log_level,
+                read_gpu_transforms=_IS_OVRTX_0_3_0_OR_NEWER,
+            )
+            self._renderer = Renderer(ovrtx_config)
+            assert self._renderer, "Renderer should be valid after creation"
+            logger.info("OVRTX renderer created successfully")
+        else:
+            logger.info("OVRTX renderer already constructed via early_init; skipping re-creation")
 
         if usd_scene_path is not None:
             logger.info("Injecting camera definitions...")

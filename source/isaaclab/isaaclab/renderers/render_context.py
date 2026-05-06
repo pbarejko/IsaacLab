@@ -128,6 +128,17 @@ class RenderContext:
         """Clear per-step transform dedupe (e.g. a long pause with no physics)."""
         self._last_transforms_step = None
 
+    def early_init_all(self) -> None:
+        """Run :meth:`BaseRenderer.early_init` on every registered backend.
+
+        Used by ``InteractiveScene`` to give renderers (e.g. OVRTX) a chance
+        to claim process-global resources before the physics backend
+        constructs its own native instance. Backends that don't override
+        :meth:`BaseRenderer.early_init` are no-op.
+        """
+        for _cfg, renderer in self._renderer_entries:
+            renderer.early_init()
+
     def cleanup(self) -> None:
         """Release all registered renderer backends.
 

@@ -159,15 +159,20 @@ class InteractiveScene:
         # prepare cloner for environment replication
         self.env_prim_paths = [f"{self.env_ns}/env_{i}" for i in range(self.cfg.num_envs)]
 
+        # ovphysx 0.4.3 removed the public `physx.clone()` API (replaced by
+        # `attach_stage` + `ovstage_clone_subtree`). Until that ovstage bridge
+        # is wired into IsaacLab, USD-side cloning is the supported ovphysx
+        # path: USD-replicate env_1..N so ovphysx ingests every env's physics
+        # prims directly, and skip the physics-runtime clone hook entirely.
+        # See source/isaaclab_ov/docs/ovphysx_coexist_DESIGN.md item C.
+        is_ovphysx = self.physics_backend.startswith("ovphysx")
         self.cloner_cfg = cloner.TemplateCloneCfg(
             clone_regex=self.env_regex_ns,
             clone_in_fabric=self.cfg.clone_in_fabric,
             device=self.device,
-            physics_clone_fn=physics_clone_fn,
-            # For ovphysx: env_1..N are created by physx.clone() in the physics
-            # runtime after add_usd().  USD replication of the asset hierarchy
-            # to env_1..N is skipped — only env_0 needs physics prims in the USD.
-            clone_usd=not self.physics_backend.startswith("ovphysx"),
+            physics_clone_fn=None if is_ovphysx else physics_clone_fn,
+            clone_physics=not is_ovphysx,
+            clone_usd=True,
         )
 
         # create source prim
@@ -208,6 +213,34 @@ class InteractiveScene:
             # Intentionally matches both physx and ovphysx (both are PhysX-based)
             if self.cfg.filter_collisions and "physx" in self.physics_backend:
                 self.filter_collisions(self._global_prim_paths)
+
+    def early_init_renderers(self) -> None:
+        """Pre-register every Camera sensor's renderer cfg and call
+        :meth:`BaseRenderer.early_init` on each backend.
+
+        Must be called before the physics manager constructs its native
+        instance: renderers like OVRTX share a Carbonite framework with
+        ovphysx and SIGSEGV inside ``createRTXRenderer`` if they're
+        constructed second. Camera sensors normally register their
+        renderer lazily during ``Camera._initialize_impl`` (which fires on
+        PHYSICS_READY, after :meth:`OvPhysxManager._warmup_and_load`);
+        this method flips that order.
+
+        Idempotent. Backends that don't override
+        :meth:`BaseRenderer.early_init` are no-op. Tasks that add Camera
+        sensors after :class:`InteractiveScene` construction (e.g. via
+        ``DirectRLEnv._setup_scene``) should call this method themselves
+        between sensor construction and ``sim.reset()`` — the framework's
+        :class:`DirectRLEnv` does this for built-in camera tasks.
+        """
+        from isaaclab.sensors.camera.camera import Camera as _Camera
+
+        for _name, sensor in self._sensors.items():
+            if isinstance(sensor, _Camera):
+                renderer_cfg = getattr(sensor.cfg, "renderer_cfg", None)
+                if renderer_cfg is not None:
+                    self.sim.render_context.get_renderer(renderer_cfg)
+        self.sim.render_context.early_init_all()
 
     def clone_environments(self, copy_from_source: bool = False):
         """Creates clones of the environment ``/World/envs/env_0``.
