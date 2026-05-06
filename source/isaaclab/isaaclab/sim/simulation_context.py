@@ -843,8 +843,16 @@ class SimulationContext:
     def clear_instance(cls) -> None:
         """Clean up resources and clear the singleton instance."""
         if cls._instance is not None:
-            # Close physics manager FIRST to detach PhysX from the stage
-            # This must happen before clearing USD prims to avoid PhysX cleanup errors
+            # Tear down camera renderers FIRST. Some backends (e.g. OVRTX) own
+            # native objects that share a Carbonite framework with the physics
+            # backend (ovphysx); when both are loaded those objects must release
+            # before the physics-side Carbonite teardown runs, otherwise the
+            # second teardown crashes on already-freed plugin state. For
+            # backends without that constraint this is a no-op.
+            cls._instance._render_context.cleanup()
+
+            # Close physics manager to detach PhysX from the stage. This must
+            # happen before clearing USD prims to avoid PhysX cleanup errors.
             cls._instance.physics_manager.close()
 
             # Close all visualizers
