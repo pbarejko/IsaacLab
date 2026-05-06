@@ -127,3 +127,39 @@ class RenderContext:
     def reset_transform_cadence(self) -> None:
         """Clear per-step transform dedupe (e.g. a long pause with no physics)."""
         self._last_transforms_step = None
+
+    def early_init_all(self) -> None:
+        """Run :meth:`BaseRenderer.early_init` on every registered backend.
+
+        Used by ``InteractiveScene`` to give renderers (e.g. OVRTX) a chance
+        to claim process-global resources before the physics backend
+        constructs its own native instance. Backends that don't override
+        :meth:`BaseRenderer.early_init` are no-op.
+        """
+        for _cfg, renderer in self._renderer_entries:
+            renderer.early_init()
+
+    def cleanup(self) -> None:
+        """Release all registered renderer backends.
+
+        Calls :meth:`BaseRenderer.cleanup` on each entry, then clears the
+        registration list. Safe to call multiple times. Per-camera
+        :meth:`Camera.__del__` cleanup remains in place but becomes a no-op
+        because the underlying backend has already torn down.
+
+        Called from :meth:`SimulationContext.clear_instance` before the
+        physics backend closes, so renderer-owned native resources (e.g.
+        OVRTX's HydraEngine) are released first. Required by the
+        ovphysx + ovrtx coexistence contract: ovrtx must release its
+        Carbonite-owning native objects before ovphysx tears down its own
+        Carbonite instance.
+        """
+        for _cfg, renderer in self._renderer_entries:
+            try:
+                renderer.cleanup(None)
+            except Exception as e:
+                logger.warning("Error tearing down renderer %s: %s", type(renderer).__name__, e)
+        self._renderer_entries.clear()
+        self._prepared_renderer_ids.clear()
+        self._prepared_num_envs = None
+        self._last_transforms_step = None

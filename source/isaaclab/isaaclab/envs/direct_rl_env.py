@@ -192,6 +192,12 @@ class DirectRLEnv(gym.Env):
         # note: this activates the physics simulation view that exposes TensorAPIs
         # note: when started in extension mode, first call sim.reset_async() and then initialize the managers
         print("[INFO]: Starting the simulation. This may take a few seconds. Please wait...")
+        # Pre-register Camera renderer cfgs and run BaseRenderer.early_init on each
+        # backend. Required for ovphysx + OVRTX coexistence: OVRTX must claim
+        # Carbonite before ovphysx constructs its native instance (sim.reset →
+        # OvPhysxManager._warmup_and_load), otherwise createRTXRenderer SIGSEGVs.
+        # No-op for backends without an early_init override.
+        self.scene.early_init_renderers()
         with Timer("[INFO]: Time taken for simulation start", "simulation_start"):
             # since the reset can trigger callbacks which use the stage,
             # we need to set the stage context here
