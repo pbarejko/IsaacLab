@@ -2,173 +2,183 @@
 
 Tracking ticket: OMPE-88037 — `presets=ovphysx,ovrtx_renderer,rgb`.
 
-This branch (`erarnold/ovphysx-ovrtx-coexist`, off `pbarejko/ovphysx-ovrtx`)
-contains only the changes that are clearly correct without first answering
-the open questions to the kit/sdk and ovstage agents listed in
-`~/tmp/OMPE-88037-ovphysx-ovrtx-isaaclab.md`. The harder pieces are
-captured here as design notes.
+Branch: `erarnold/ovphysx-ovrtx-coexist`, off `pbarejko/ovphysx-ovrtx`.
 
-## What this branch does land
+Validated against ovphysx 0.4.3 (`dev/erarnold/ovstage-attach`,
+commit `c728f7e740`) and ovrtx 0.3.0.307110 on Linux x86_64. The
+cartpole repro
+(`Isaac-Cartpole-Camera-Presets-Direct-v0`, 32 envs, 100×100 RGB tiled
+camera, 2 epochs) runs end-to-end at ~670 fps in 16-17 seconds.
 
-**Renderer-side teardown before physics-side teardown.**
-`SimulationContext.clear_instance()` now calls
-`self._render_context.cleanup()` before `physics_manager.close()`. The
-new `RenderContext.cleanup()` method walks the registered renderer
-backends and invokes `BaseRenderer.cleanup(None)` on each, then drops
-its registration list. Per-camera `Camera.__del__` cleanup remains in
-place as a safety net but becomes a no-op once the central cleanup has
-run.
+This doc tracks the four pieces the integration needed and links the
+specific commits that landed each. Three questions to the kit/sdk and
+ovstage teams informed the design:
 
-Why: the kit/sdk and ovstage samples (see
-`~/repos/kit/sdks/source/ovphysx_ovrtx_integration_example/README.md`
-"Cleanup order matches C++ sample" and
-`~/repos/ovstage/src/examples/render_physx.cpp:785`) are explicit that
-ovrtx must release before ovphysx tears down their shared Carbonite.
-Today IsaacLab releases physics first and lets cameras GC last; that
-inversion crashes the second native teardown. The fix is small, has no
-behavior change for non-ovrtx backends, and removes the sequencing
-dependency on Python GC.
+1. **kit/sdk:** "does ovphysx 0.4.3's coexistence default flip relax
+   the init-order requirement, or only suppress the env-var nag?"
+   → **Only suppresses the nag.** ovrtx is the side that can't go
+   second; it does no checks at construction time. Hence item 3 below.
+2. **kit/sdk:** "validated ovrtx pip build for ovphysx 0.4.x?"
+   → `0.3.0.307110` (kit demos) or `0.3.0.304843` (ovstage demo) —
+   either works against the same shared deps.
+3. **ovstage:** "slim ovphysx-pose → ovrtx-binding recipe without
+   pulling ovstage in?" → "Don't pull ovstage in for the steady-state
+   pose-forward path." Recipe: ovphysx pose binding → CUDA quat→mat4
+   kernel → ovrtx `write_attribute(omni:xform, XFORM_MAT4x4)`. Used
+   unmodified for item 4 below.
 
-## What this branch defers
+## 1. Renderer teardown before physics teardown — landed
 
-### A. Hoist OVRTXRenderer construction before OvPhysxManager._warmup_and_load
+**What.** `SimulationContext.clear_instance()` calls
+`self._render_context.cleanup()` before `physics_manager.close()`. New
+`RenderContext.cleanup()` walks registered backends, invokes
+`BaseRenderer.cleanup(None)` on each, drops the registration list.
+Per-camera `Camera.__del__` cleanup stays as a safety net but is a
+no-op after central cleanup.
 
-**Problem.** Today `ovrtx.Renderer(config)` is constructed lazily inside
-`OVRTXRenderer.initialize(spec)` (in `source/isaaclab_ov/.../ovrtx_renderer.py`),
-which is called from `OVRTXRenderer.create_render_data()`, which is
-called from `Camera._initialize_impl()` (in
-`source/isaaclab/isaaclab/sensors/camera/camera.py:423`), which fires
-on the `PHYSICS_READY` event dispatched at the end of
-`OvPhysxManager.reset() → _warmup_and_load()`. By that point ovphysx has
-already constructed `ovphysx.PhysX(device=...)` and claimed Carbonite.
+**Why.** ovrtx and ovphysx share a Carbonite framework; ovrtx-side
+native objects must release before ovphysx tears down its Carbonite,
+otherwise the second teardown crashes on freed plugin state. IsaacLab
+released physics first and let cameras GC last, which inverted the
+required order.
 
-Per the working samples (`render_physx.cpp:200-214`,
-`ovlibs_sample.py:210-213`) ovrtx must claim Carbonite first, before
-ovphysx exists. Two paths:
+**Commit:** `a7ecbd0de18` "sim: tear down camera renderers before physics manager close".
 
-1. **Wheel side:** ovphysx 0.4.3 already flips the
-   `OVPHYSX_COEXIST_DIAGNOSTICS` default (commit `0917441ef9`) so that
-   ovphysx auto-detects another Carbonite owner and proceeds in
-   coexistence mode. **Open question for the kit/sdk agent (Q1 in the
-   triage doc):** does this default flip make ovphysx-first
-   work-as-coexistence-tenant, or only suppress the env-var nag?
-2. **IsaacLab side:** add a `BaseRenderer.early_init(stage)` hook that
-   the renderer uses to construct its native object before
-   `prepare_stage`. `RenderContext` exposes `early_init_all(stage)`
-   that walks registered backends. Add a hook on the physics manager
-   (or `SimulationContext.reset`) that calls it before
-   `physics_manager.reset()` runs `_warmup_and_load`. Backends that
-   don't need it (Newton, Isaac RTX) get a default no-op.
+## 2. ovphysx 0.4.3 clone-API removal — landed
 
-The catch with (2): Camera sensors only register their renderer cfg
-during `_initialize_impl` (after PHYSICS_READY), so at the early hook
-nothing is registered yet. We need to pre-walk the scene cfg for
-`CameraCfg.renderer_cfg` entries during `InteractiveScene` build (or
-`SimulationContext.__init__`) and register them up front.
+**What.** ovphysx 0.4.3 removed the public `physx.clone()` (replaced
+by `attach_stage` + `ovstage_clone_subtree`). Until that ovstage
+bridge is wired into IsaacLab, `InteractiveScene` routes ovphysx
+through USD-side cloning: `clone_usd=True`, `clone_physics=False`,
+`physics_clone_fn=None`. Every env's physics prims live in the USD
+that ovphysx ingests; no physics-runtime clone is needed.
+`OvPhysxManager._warmup_and_load` now raises a clear error if a
+pre-0.4.3 wheel and the legacy `clone_physics=True` path coincide,
+rather than letting `AttributeError` bubble through `Camera`
+initialization.
 
-**Don't implement until Q1 is answered.** If 0.4.3 does relax the order
-constraint, (1) is enough and IsaacLab can keep the lazy construction
-path.
+**Why.** Previously the ovphysx branch routed `clone_usd=False` so
+that `physx.clone()` could populate env_1..N in the physics runtime;
+the 0.4.3 wheel removed that entry point.
 
-### B. Wire OVRTXRenderer._setup_object_bindings to read OvPhysx pose bindings
+**Commit:** `f018386acda` "sim: ovphysx 0.4.3 + ovrtx coexistence — clone migration + renderer init hoist".
 
-**Problem.** `OVRTXRenderer._setup_object_bindings` (line 307) and
-`OVRTXRenderer.update_transforms` (line 409) call
-`SimulationContext.instance().initialize_scene_data_provider().get_newton_model()`
-and `.get_newton_state().body_q`. With OvPhysx these return `None`, so
-object transforms never reach OVRTX (camera transforms still work via
-the omni:xform binding written from `update_camera`).
+**Future work.** Pulling `ovstage` into IsaacLab as a third dependency
++ wiring `physx.attach_stage(stage)` + `stage.clone_subtree(...)`
+restores physics-runtime cloning. Per the ovstage team's guidance,
+this is *not* recommended for the steady-state pose-forward path
+(item 4 below already does that without ovstage); it would only matter
+if someone hits a perf or memory limit on USD-side cloning at large
+`num_envs`.
 
-**Two ways forward:**
+## 3. OVRTXRenderer init order — landed
 
-1. **Add an `OvPhysxSceneDataProvider`** that mirrors the Newton
-   provider's interface (`get_newton_model()` returns a path/index list,
-   `get_newton_state()` returns a body-q tensor). The provider wraps
-   ovphysx tensor bindings — pose binding → body_q tensor in
-   `wp.transformf` layout. Keep the same renderer code by aliasing
-   "newton state" to "physics state" at the provider level.
-2. **Add a `BaseSceneDataProvider.get_body_transforms()`** abstraction
-   so OVRTXRenderer no longer reaches for Newton-specific accessors,
-   then implement it on both Newton and a new OvPhysx provider.
+**What.** New `BaseRenderer.early_init()` hook (default no-op).
+`OVRTXRenderer` overrides it to construct the C++ `Renderer(config)`
+up front. `OVRTXRenderer.initialize(spec)` skips renderer construction
+when `early_init` already ran. New `RenderContext.early_init_all()`
+walks registered backends. New `InteractiveScene.early_init_renderers()`
+pre-walks `Camera` sensors to register their `renderer_cfg` with the
+context so `early_init` has something to act on. `DirectRLEnv._init_sim`
+calls `scene.early_init_renderers()` between `_setup_scene` (which is
+where the cartpole task adds its tiled camera) and `sim.reset()`.
 
-(2) is cleaner but a bigger renderer-side change. (1) is fewer LOC and
-keeps the scope focused on unblocking the bug. **Open question for the
-ovstage agent (Q3 in the triage doc):** if there's a third option
-(IsaacLab pulls in `ovstage` as a third dependency and uses the
-ovstage→ovrtx attribute-write path the working samples use), is that
-the recommended pattern or a heavier one?
+**Why.** ovrtx does no coexistence checks at construction time and
+SIGSEGVs inside `createRTXRenderer` if ovphysx (or any other Carbonite
+owner) has already loaded its plugins. IsaacLab constructed OVRTX
+lazily in `Camera._initialize_impl` (which fires on PHYSICS_READY,
+*after* `OvPhysxManager._warmup_and_load`), inverting the required
+order. kit/sdk Q1 confirmed: even with ovphysx 0.4.3's coexistence
+default flip, ovrtx is the side that can't go second; the wheel-side
+flip only suppresses the env-var nag, it doesn't make ovrtx tolerant
+of being constructed second.
 
-### C. Migrate physx.clone() to attach_stage + stage.clone_subtree
+**Commit:** `f018386acda` (same as item 2; the renderer hoist and the
+clone migration share the commit).
 
-**Problem.** `OvPhysxManager._warmup_and_load` calls
-`cls._physx.clone(source, targets, transforms)` (line 278) for
-replicate-physics. ovphysx 0.4.3 removes the public `physx.clone()` API
-(see ovphysx changelog under 0.4 "Breaking changes") in favor of
-`physx.attach_stage(stage) → stage.clone_subtree(source, [targets])`
-followed by per-target `xformOp:translate` writes inside the same
-`begin_frame`/`end_frame`. The replicate plugin is unchanged; only the
-entry point moved.
+**Caveat.** The `early_init_renderers()` hook is currently called
+explicitly by `DirectRLEnv._init_sim`. Other env types (e.g.
+manager-based envs) that build cameras after `InteractiveScene.__init__`
+need to call it themselves between sensor construction and
+`sim.reset()`, otherwise the lazy renderer construction comes back and
+the SIGSEGV returns under ovphysx. Worth a follow-up that hooks it
+from a more central place (likely `SimulationContext.reset` walking the
+scene cfg, but that needs scene-cfg discovery from the sim context,
+which doesn't exist yet).
 
-**Migration sketch:**
+## 4. OvPhysx pose binding → OVRTX object transforms — landed
 
-```python
-# Before (0.4.2 and older)
-op_idx = cls._physx.clone(source, targets, transforms)
-cls._physx.wait_op(op_idx)
+**What.** `OVRTXRenderer._setup_object_bindings` now falls through to
+an OvPhysx path when the Newton scene-data provider returns no model.
+The fallback walks the USD stage for `PhysicsRigidBodyAPI` prims under
+`/World/envs/env_*` (excluding the camera and any ground plane),
+creates a single ovphysx `RIGID_BODY_POSE` tensor binding for them,
+and binds the same flat list to ovrtx `omni:xform`
+(`PrimMode.EXISTING_ONLY`, `omni:resetXformStack=True` so writes are
+treated as world transforms — same pattern as the camera binding).
 
-# After (0.4.3+)
-import ovstage  # new dependency
-stage = ovstage.Stage()  # or get from sim context if hoisted
-ovstage_op = stage.begin_frame()
-stage.clone_subtree(source, targets)
-for target_path, (x, y, z) in zip(targets, parent_positions):
-    stage.write_attribute(ovstage_op, [target_path], "xformOp:translate", pack_vec3(x, y, z))
-stage.end_frame(ovstage_op)
-# OvstageBridge ingests this on next physx.step()
-```
+`update_transforms` now branches on which fallback fired. The OvPhysx
+path: read the ovphysx pose tensor on GPU into a pre-allocated
+`[N, 7]` `wp.array`, run `sync_ovphysx_pose_to_mat44d_kernel` to
+construct ovrtx-format `mat44d` rows (column-major rotation,
+translation in row 3 — matches `create_camera_transforms_kernel`),
+then `wp.copy` into the ovrtx attribute mapping. Zero host roundtrip,
+single ovrtx write per frame.
 
-**Why deferred:**
+**Why.** Without it, the renderer ran clean on ovphysx but every
+object in the rendered frame was static — the renderer had no source
+of per-frame pose updates because `get_newton_model()` returned `None`
+under ovphysx and the Newton path was the only one wired.
 
-1. Pulling `ovstage` into IsaacLab as a third dependency is a bigger
-   ask than this branch should swallow without sign-off — it adds
-   another wheel pin, plugin path, and Carbonite tenant.
-2. The migration is wheel-version-dependent. The cleanest implementation
-   is a feature gate: try `physx.clone()` first, fall back to the
-   ovstage path if `AttributeError`. That keeps the 0.4.2 path working
-   while landing the 0.4.3 path. But the gate logic only makes sense
-   once we've actually exercised the 0.4.3 API end-to-end, which needs
-   a built 0.4.3 wheel installed in IsaacLab.
+**Recipe credit.** kit/sdk team — "don't pull ovstage in for the
+steady-state pose-forward path" recommendation, the `omni:xform`
+LOCAL/WORLD note, and the `PrimMode` caveat. We sidestepped the
+parent-strip math by using `omni:resetXformStack=True` (matches what
+the camera binding already did; the kit/sdk sample uses the same
+trick). `PrimMode.EXISTING_ONLY` worked here; the kit/sdk note about
+`EXISTING_ONLY` skipping the first write silently when the bucket has
+no `omni:xform` column didn't bite for us because the cloned env
+subtrees inherit the column from env_0.
 
-**Action when 0.4.3 wheel is in hand:** add the version gate and
-ovstage import, run the cartpole repro to confirm clones land.
+**Commit:** `9039f0adb1a` "ovrtx: forward OvPhysx rigid-body poses to OVRTX object bindings".
 
-### D. OVRTX renderer init order with respect to USD export
+**Caveats / future work.**
 
-**Problem (potential — needs verification).** `OvPhysxManager._warmup_and_load`
-exports the USD stage to a temp file before constructing ovphysx; that
-file is what ovphysx ingests. `OVRTXRenderer.prepare_stage` separately
-exports the stage to `/tmp/stage_before_ovrtx.usda` with cameras
-injected. Two distinct files. The samples have both libs `open_usd`
-the same on-disk file.
+- Articulation-link poses for cartpole are read via `RIGID_BODY_POSE`
+  rather than `ARTICULATION_LINK_POSE`. ovphysx 0.4.3 accepts this for
+  the cartpole layout (32 envs × 3 bodies = 96 prims bound), but if a
+  task hits a layout where `RIGID_BODY_POSE` rejects an articulation
+  link, the fallback should switch to a per-articulation
+  `ARTICULATION_LINK_POSE` binding, walk the USD for `PhysicsArticulationRootAPI`
+  prims to get the articulation list, and use `binding.body_names` to
+  map back to USD prim paths. Not implemented because it isn't needed
+  yet.
+- The visual smoke is by absence of update warnings + non-trivial
+  RGB output, not by frame-by-frame inspection. A short `--video`
+  capture across N steps would close that gap.
+- Fixed-base assets (e.g. ground plane) are filtered by name. A
+  task that names its ground plane something other than
+  `GroundPlane`/`ground_plane` would slip through and try to bind a
+  static body, which ovphysx may reject. Move the filter to a
+  schema check (`PhysicsRigidBodyAPI.GetRigidBodyEnabledAttr`) if
+  this becomes an issue.
 
-If the open question Q1 (init order in 0.4.3) lands as "ovrtx must
-still be first", the USD file ovrtx opens has not yet been augmented
-with the OvPhysx-required schemas (which `_configure_physx_scene_prim`
-writes onto the in-memory stage right before export). One USD file
-that both backends open is the cleanest fix; needs a small refactor of
-the export path so OvPhysxManager and OVRTXRenderer share the export.
+## Cross-cutting notes
 
-**Defer until Q1 + the actual repro on 0.4.3 says whether this matters.**
+**ovrtx wheel pin.** kit/sdk's CMake comment about needing
+"Fabric IStageReaderWriter v0.16+" remains relevant: the run prints
+repeated `Warning: Possible version incompatibility. Attempting to
+load omni::fabric::IStageReaderWriter with version v0.16 against v0.15`.
+Non-fatal, but the kit/sdk team probably wants to know which dep is
+still on v0.15 in the 0.4.3 + 0.3.0.307110 combo.
 
-## Open questions blocking the deferred items
+**`os._exit(0)` shutdown hack.** `OvPhysxManager._construct_physx`
+still installs an `atexit` handler that calls `os._exit(0)` to
+sidestep the dual-Carbonite static-destructor race. Keep until
+ovphysx ships a namespace-isolated Carbonite (the existing HACK
+comment in `ovphysx_manager.py` covers the rationale).
 
-(Same numbering as `~/tmp/OMPE-88037-ovphysx-ovrtx-isaaclab.md` §3-§4.)
-
-- **Q1 (kit/sdk):** Does ovphysx 0.4.3 *enforce* coexistence-mode
-  regardless of init order, or only suppress the env-var nag? Decides
-  whether item A is needed at all.
-- **Q2 (kit/sdk):** Validated ovrtx pip build for ovphysx 0.4.x.
-  Decides item D / pin update.
-- **Q3 (ovstage):** Slimmest "ovphysx pose tensor → ovrtx CUDA tensor"
-  recipe. Decides item B's choice between an OvPhysx scene-data
-  provider vs pulling ovstage in.
+**Kit visualizer suspension.** Not touched in this branch. The
+`SimulationContext` already has the kit-visualizer-aware paths
+gated on `has_kit()`, so kitless ovphysx + ovrtx runs go through
+the right branches without changes.
