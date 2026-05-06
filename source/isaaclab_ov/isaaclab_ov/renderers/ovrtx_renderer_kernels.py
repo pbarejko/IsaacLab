@@ -328,3 +328,58 @@ def sync_newton_transforms_kernel(
     body_idx = newton_body_indices[i]
     transform = newton_body_q[body_idx]
     ovrtx_transforms[i] = wp.transpose(wp.mat44d(wp.math.transform_to_matrix(transform)))
+
+
+@wp.kernel
+def sync_ovphysx_pose_to_mat44d_kernel(
+    pose: wp.array2d(dtype=wp.float32),  # type: ignore  # shape (N, 7) — px,py,pz,qx,qy,qz,qw
+    ovrtx_transforms: wp.array(dtype=wp.mat44d),  # type: ignore  # shape (N,)
+):
+    """Convert ovphysx ``RIGID_BODY_POSE`` rows ``[px,py,pz, qx,qy,qz,qw]`` into
+    OVRTX-format ``mat44d`` (column-major double matrix, translation in row 3).
+
+    ovrtx writes ``omni:xform`` as a 4x4 double matrix; the renderer's prims
+    use ``omni:resetXformStack=True`` so the value is interpreted as the world
+    transform regardless of any parent xform stack. Output layout matches
+    :func:`create_camera_transforms_kernel` (column-major rotation, translation
+    in row 3 cols 0-2, ``1.0`` at ``[3,3]``).
+    """
+    i = wp.tid()
+    px = pose[i, 0]
+    py = pose[i, 1]
+    pz = pose[i, 2]
+    qx = pose[i, 3]
+    qy = pose[i, 4]
+    qz = pose[i, 5]
+    qw = pose[i, 6]
+
+    r00 = 1.0 - 2.0 * (qy * qy + qz * qz)
+    r01 = 2.0 * (qx * qy - qw * qz)
+    r02 = 2.0 * (qx * qz + qw * qy)
+    r10 = 2.0 * (qx * qy + qw * qz)
+    r11 = 1.0 - 2.0 * (qx * qx + qz * qz)
+    r12 = 2.0 * (qy * qz - qw * qx)
+    r20 = 2.0 * (qx * qz - qw * qy)
+    r21 = 2.0 * (qy * qz + qw * qx)
+    r22 = 1.0 - 2.0 * (qx * qx + qy * qy)
+
+    _0 = wp.float64(0.0)
+    _1 = wp.float64(1.0)
+    ovrtx_transforms[i] = wp.mat44d(  # type: ignore
+        wp.float64(r00),
+        wp.float64(r10),
+        wp.float64(r20),
+        _0,
+        wp.float64(r01),
+        wp.float64(r11),
+        wp.float64(r21),
+        _0,
+        wp.float64(r02),
+        wp.float64(r12),
+        wp.float64(r22),
+        _0,
+        wp.float64(float(px)),
+        wp.float64(float(py)),
+        wp.float64(float(pz)),
+        _1,
+    )

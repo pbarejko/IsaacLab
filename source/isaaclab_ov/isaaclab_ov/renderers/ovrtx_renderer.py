@@ -53,6 +53,7 @@ from .ovrtx_renderer_kernels import (
     generate_random_colors_from_ids_kernel,
     generate_random_colors_from_ids_kernel_legacy,
     sync_newton_transforms_kernel,
+    sync_ovphysx_pose_to_mat44d_kernel,
 )
 from .ovrtx_usd import (
     create_cloning_attributes,
@@ -153,6 +154,12 @@ class OVRTXRenderer(BaseRenderer):
         self._camera_binding = None
         self._object_binding = None
         self._object_newton_indices: wp.array | None = None
+        # OvPhysx pose-binding state (alternative to the Newton path; populated
+        # by :meth:`_setup_object_bindings` when an OvPhysx physics manager is
+        # active and Newton's scene-data provider returns no model).
+        self._object_ovphysx_binding = None
+        self._object_ovphysx_pose_buf: wp.array | None = None
+        self._object_ovphysx_mat4_buf: wp.array | None = None
         self._initialized_scene = False
         self._exported_usd_path: str | None = None
         self._camera_rel_path: str | None = None
@@ -333,14 +340,22 @@ class OVRTXRenderer(BaseRenderer):
             logger.warning("Failed to write scene partitions: %s", e, exc_info=True)
 
     def _setup_object_bindings(self):
-        """Setup OVRTX bindings for scene objects to sync with Newton physics."""
+        """Setup OVRTX bindings for scene objects.
+
+        Tries the Newton scene-data-provider path first; on backends that do
+        not provide a Newton model (notably OvPhysx) falls through to a direct
+        ovphysx ``RIGID_BODY_POSE`` tensor binding. Per
+        ``/tmp/ovstage-answer.md`` the slim ovphysx-pose → ovrtx-binding recipe
+        avoids pulling ovstage in for the steady-state pose-forward path.
+        """
         try:
             from isaaclab.sim import SimulationContext
 
             provider = SimulationContext.instance().initialize_scene_data_provider()
             newton_model = provider.get_newton_model()
             if newton_model is None:
-                logger.info("Newton model not available, skipping object bindings")
+                logger.info("Newton model not available; trying OvPhysx fallback")
+                self._setup_object_bindings_ovphysx()
                 return
 
             all_body_paths = getattr(newton_model, "body_label", None)
@@ -381,9 +396,109 @@ class OVRTXRenderer(BaseRenderer):
             else:
                 logger.warning("Object binding is None")
         except ImportError:
-            logger.info("Newton not available, skipping object bindings")
+            logger.info("Newton not available, trying OvPhysx fallback")
+            self._setup_object_bindings_ovphysx()
         except Exception as e:
             logger.warning("Error setting up object bindings: %s", e)
+
+    def _setup_object_bindings_ovphysx(self):
+        """Setup OVRTX object bindings against an OvPhysx physics backend.
+
+        Walks the USD stage for prims with ``PhysicsRigidBodyAPI`` under
+        ``/World/envs/env_*`` (excluding the camera and any ground plane),
+        creates a single ovphysx ``RIGID_BODY_POSE`` binding for them, and
+        binds the same flat list of paths to ovrtx ``omni:xform``. Each frame
+        :meth:`update_transforms` reads the [N, 7] pose tensor on GPU,
+        converts to mat44d via :func:`sync_ovphysx_pose_to_mat44d_kernel`, and
+        writes into the ovrtx attribute mapping — no host roundtrip.
+
+        The ``omni:resetXformStack=True`` write makes ovrtx interpret the
+        written matrix as the world transform regardless of any parent xform
+        stack, mirroring the camera-binding pattern at
+        :meth:`OVRTXRenderer.initialize`. This sidesteps the
+        ``omni:xform``-is-LOCAL parent-strip math the kit/sdk recipe in
+        ``/tmp/ovstage-answer.md`` describes for prims that don't reset their
+        xform stack.
+        """
+        try:
+            from isaaclab.sim import SimulationContext
+            from isaaclab_ovphysx.physics.ovphysx_manager import OvPhysxManager
+            from ovphysx import TensorType
+        except ImportError:
+            logger.info("OvPhysx not available; skipping object bindings")
+            return
+
+        sim_ctx = SimulationContext.instance()
+        if sim_ctx is None:
+            return
+        physx_instance = OvPhysxManager.get_physx_instance()
+        if physx_instance is None:
+            logger.info("OvPhysx PhysX instance not yet constructed; skipping object bindings")
+            return
+
+        from pxr import Usd, UsdPhysics
+
+        stage = sim_ctx.stage
+        object_paths: list[str] = []
+        for prim in stage.Traverse(Usd.PrimIsActive & Usd.PrimIsDefined & Usd.PrimIsLoaded):
+            if not prim.HasAPI(UsdPhysics.RigidBodyAPI):
+                continue
+            path = prim.GetPath().pathString
+            if "/World/envs/" not in path:
+                continue
+            if self._camera_rel_path and self._camera_rel_path in path:
+                continue
+            if "GroundPlane" in path or "ground_plane" in path:
+                continue
+            object_paths.append(path)
+
+        if not object_paths:
+            logger.info("OvPhysx: no rigid bodies found for OVRTX object binding")
+            return
+
+        try:
+            self._object_ovphysx_binding = physx_instance.create_tensor_binding(
+                prim_paths=object_paths,
+                tensor_type=TensorType.RIGID_BODY_POSE,
+            )
+        except Exception as e:
+            logger.warning("OvPhysx: create_tensor_binding(RIGID_BODY_POSE) failed: %s", e)
+            return
+
+        binding_shape = tuple(self._object_ovphysx_binding.shape)
+        logger.info(
+            "OvPhysx: created RIGID_BODY_POSE binding for %d ovrtx prims (shape=%s)",
+            len(object_paths),
+            binding_shape,
+        )
+
+        # Pre-allocate GPU pose + mat4 buffers sized to the binding's reported
+        # row count (which may be smaller than ``len(object_paths)`` if any
+        # prim path didn't match a physics body in the loaded stage).
+        n = int(binding_shape[0])
+        self._object_ovphysx_pose_buf = wp.zeros((n, 7), dtype=wp.float32, device=DEVICE)
+        self._object_ovphysx_mat4_buf = wp.zeros(n, dtype=wp.mat44d, device=DEVICE)
+
+        self._object_binding = self._renderer.bind_attribute(
+            prim_paths=object_paths[:n],
+            attribute_name="omni:xform",
+            semantic=Semantic.XFORM_MAT4x4,
+            prim_mode=PrimMode.EXISTING_ONLY,
+        )
+        if self._object_binding is None:
+            logger.warning("OvPhysx: ovrtx omni:xform binding returned None")
+            return
+
+        try:
+            self._renderer.write_attribute(
+                prim_paths=object_paths[:n],
+                attribute_name="omni:resetXformStack",
+                tensor=np.full(n, True, dtype=np.bool_),
+            )
+        except Exception as e:
+            logger.warning("OvPhysx: failed to write omni:resetXformStack: %s", e)
+
+        logger.info("OvPhysx object bindings ready (%d prims)", n)
 
     def create_render_data(self, spec: CameraRenderSpec) -> OVRTXRenderData:
         """Create OVRTX-specific RenderData with GPU buffers.
@@ -435,10 +550,17 @@ class OVRTXRenderer(BaseRenderer):
             )
 
     def update_transforms(self) -> None:
-        """Sync physics objects to OVRTX."""
-        if self._object_binding is None or self._object_newton_indices is None:
+        """Sync physics objects to OVRTX (Newton or OvPhysx, whichever is wired)."""
+        if self._object_binding is None:
             return
 
+        if self._object_ovphysx_binding is not None:
+            self._update_transforms_ovphysx()
+            return
+        if self._object_newton_indices is not None:
+            self._update_transforms_newton()
+
+    def _update_transforms_newton(self) -> None:
         try:
             from isaaclab.sim import SimulationContext
 
@@ -459,7 +581,31 @@ class OVRTXRenderer(BaseRenderer):
                     device=DEVICE,
                 )
         except Exception as e:
-            logger.warning("Failed to update object transforms: %s", e)
+            logger.warning("Failed to update object transforms (Newton): %s", e)
+
+    def _update_transforms_ovphysx(self) -> None:
+        """OvPhysx pose binding → CUDA mat44d → ovrtx omni:xform write.
+
+        Reads the ovphysx ``RIGID_BODY_POSE`` tensor (CUDA-resident, [N, 7])
+        into a pre-allocated GPU buffer, runs
+        :func:`sync_ovphysx_pose_to_mat44d_kernel` to construct the
+        ovrtx-format ``mat44d`` rows, then copies into the ovrtx attribute
+        mapping. No host roundtrip.
+        """
+        try:
+            n = int(self._object_ovphysx_pose_buf.shape[0])
+            self._object_ovphysx_binding.read(self._object_ovphysx_pose_buf)
+            wp.launch(
+                kernel=sync_ovphysx_pose_to_mat44d_kernel,
+                dim=n,
+                inputs=[self._object_ovphysx_pose_buf, self._object_ovphysx_mat4_buf],
+                device=DEVICE,
+            )
+            with self._object_binding.map(device=Device.CUDA, device_id=0) as attr_mapping:
+                ovrtx_transforms = wp.from_dlpack(attr_mapping.tensor, dtype=wp.mat44d)
+                wp.copy(ovrtx_transforms, self._object_ovphysx_mat4_buf)
+        except Exception as e:
+            logger.warning("Failed to update object transforms (OvPhysx): %s", e)
 
     def update_camera(
         self,
