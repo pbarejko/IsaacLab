@@ -310,6 +310,9 @@ class Camera(SensorBase):
             self._view = None
         # cleanup render resources (renderer may be None if never initialized)
         if getattr(self, "_renderer", None) is not None:
+            sim_ctx = sim_utils.SimulationContext.instance()
+            if sim_ctx is not None:
+                sim_ctx.render_context.remove_camera(self)
             self._renderer.cleanup(getattr(self, "_render_data", None))
 
     def __str__(self) -> str:
@@ -333,8 +336,17 @@ class Camera(SensorBase):
 
     @property
     def data(self) -> CameraData:
+        """Latest camera data, completing queued due captures sharing this camera's renderer.
+
+        Reading one camera may also update another camera's reused output buffers. Copy images
+        that must outlive the next capture. Cameras retain their individual update periods.
+        """
         # update sensors if needed
         self._update_outdated_buffers()
+        # A data read is a completion boundary even inside an eager update scope.
+        sim_ctx = sim_utils.SimulationContext.instance()
+        if sim_ctx is not None and self._renderer is not None:
+            sim_ctx.render_context.render_pending_cameras(sim_ctx.get_physics_step_count(), self._renderer)
         # return the data
         return self._data
 
@@ -480,6 +492,7 @@ class Camera(SensorBase):
         )
         wp.copy(self._data.intrinsic_matrices.warp, self._intrinsic_pending)
         wp.copy(self._intrinsic_parameters, self._intrinsic_parameters_pending)
+        self._invalidate_render(indices)
 
     """
     Operations - Set pose.
@@ -538,6 +551,7 @@ class Camera(SensorBase):
         # write through to the data buffers so explicitly set poses are never stale,
         # regardless of :attr:`CameraCfg.update_latest_camera_pose`
         self._update_poses(env_ids=idx_wp, frame_op=0)
+        self._invalidate_render(idx_wp)
 
     def set_world_poses_from_view(
         self, eyes: torch.Tensor, targets: torch.Tensor, env_ids: Sequence[int] | None = None
@@ -604,10 +618,23 @@ class Camera(SensorBase):
         # write through to the data buffers so explicitly set poses are never stale,
         # regardless of :attr:`CameraCfg.update_latest_camera_pose`
         self._update_poses(env_ids=idx_wp, frame_op=0)
+        self._invalidate_render(idx_wp)
 
     """
     Operations
     """
+
+    def update(self, dt: float, force_recompute: bool = False) -> None:
+        """Advance capture timing and queue due images for the next camera-data read.
+
+        Args:
+            dt: Time since the previous update [s].
+            force_recompute: Complete due captures immediately unless the scene is collecting
+                eager camera updates. This does not override the configured update period.
+        """
+        super().update(dt, force_recompute=force_recompute)
+        if self._is_initialized and self._data_generation != self._data_generation_last_update:
+            self._queue_render()
 
     def reset(self, env_ids: Sequence[int] | None = None, env_mask: wp.array | None = None):
         if not self._is_initialized:
@@ -623,6 +650,8 @@ class Camera(SensorBase):
         else:
             env_ids_wp = self._resolve_env_ids_wp(env_ids)
             self._update_poses(env_ids_wp, frame_op=2)
+        self._renderer.invalidate_camera(self._render_data)
+        self._queue_render()
 
     """
     Implementation.
@@ -709,29 +738,69 @@ class Camera(SensorBase):
 
         # Create internal buffers (includes intrinsic matrix and pose init)
         self._create_buffers()
+        self._queue_render()
 
     def _update_buffers_impl(self, env_mask: wp.array):
+        """Capture one camera when no simulation render context is available."""
         if not self._env_mask_has_any(env_mask):
             return
-        # Increment frame count
-        if self.cfg.update_latest_camera_pose:
-            self._update_poses(env_mask=env_mask, frame_op=1)
-        else:
-            self._update_camera_state(env_mask=env_mask, frame_op=1)
+        self._prepare_camera(env_mask)
+        self._renderer.render([self._render_data])
+        self._renderer.read_output(self._render_data, self._data)
+        self._update_camera_state(env_mask=env_mask, frame_op=1)
 
-        sim_ctx = sim_utils.SimulationContext.instance()
-        renderer = self._renderer
-        assert renderer is not None
-        if sim_ctx is not None:
-            sim_ctx.render_context.render_into_camera(
-                renderer,
-                self._render_data,
-                self._data,
-                sim_ctx.get_physics_step_count(),
-            )
+    def _prepare_camera(self, env_mask: wp.array) -> None:
+        """Publish the capture pose without advancing the successful-frame count."""
+        if self.cfg.update_latest_camera_pose:
+            self._update_poses(env_mask=env_mask, frame_op=0)
         else:
-            renderer.render(self._render_data)
-            renderer.read_output(self._render_data, self._data)
+            self._renderer.update_camera(
+                self._render_data, self._data.pos_w, self._data.quat_w_world, self._data.intrinsic_matrices
+            )
+
+    def _queue_render(self) -> None:
+        """Register the latest capture request without retaining the camera in the context."""
+        sim_ctx = sim_utils.SimulationContext.instance()
+        if sim_ctx is not None and self._render_data is not None:
+            sim_ctx.render_context.queue_camera(self)
+
+    def _update_outdated_buffers(self, force_recompute: bool = False) -> None:
+        sim_ctx = sim_utils.SimulationContext.instance()
+        if sim_ctx is None:
+            super()._update_outdated_buffers(force_recompute=force_recompute)
+            return
+        if not force_recompute and self._data_generation == self._data_generation_last_update:
+            return
+        self._queue_render()
+        if not sim_ctx.render_context.camera_renders_deferred:
+            sim_ctx.render_context.render_pending_cameras(sim_ctx.get_physics_step_count(), self._renderer)
+
+    def _prepare_render(self) -> bool:
+        """Prepare a queued capture, respecting this camera's update period and reset mask."""
+        if self._data_generation == self._data_generation_last_update:
+            return False
+        if not self._env_mask_has_any(self._is_outdated):
+            self._data_generation_last_update = self._data_generation
+            return False
+        self._prepare_camera(self._is_outdated)
+        return True
+
+    def _complete_render(self) -> None:
+        """Commit frame counters and timestamps after the whole render group succeeds."""
+        self._update_camera_state(env_mask=self._is_outdated, frame_op=1)
+        self._mark_buffers_updated()
+
+    def _invalidate_render(self, env_ids: wp.array | None = None) -> None:
+        """Invalidate images after an explicit pose or calibration change, including within a step."""
+        if self._render_data is None:
+            return
+        if env_ids is None:
+            self._is_outdated.fill_(True)
+        else:
+            wp.to_torch(self._is_outdated)[wp.to_torch(env_ids).long()] = True
+        self._data_generation += 1
+        self._renderer.invalidate_camera(self._render_data)
+        self._queue_render()
 
     """
     Private Helpers
@@ -1006,6 +1075,9 @@ class Camera(SensorBase):
 
     def _invalidate_initialize_callback(self, event):
         """Invalidates the scene elements."""
+        sim_ctx = sim_utils.SimulationContext.instance()
+        if sim_ctx is not None:
+            sim_ctx.render_context.remove_camera(self)
         if self._renderer is not None and self._render_data is not None:
             self._renderer.cleanup(self._render_data)
         self._render_data = None

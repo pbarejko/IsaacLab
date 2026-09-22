@@ -84,11 +84,12 @@
         ]
     },
     {
-        "_comment": "=== RENDER ORCHESTRATION: sits between the camera sensor and the renderer. render_into_camera wraps update_scene_state + render + read_output, so it brackets the whole per-frame render. update_scene_state is the once-per-physics-step dedupe gate that drives update_transforms/update_geometries -- when it early-outs you see the renderer do nothing, which is the expected behavior, not a gap. ===",
+        "_comment": "=== RENDER ORCHESTRATION: sits between camera sensors and the renderer. render_pending_cameras prepares queued cameras, groups them by renderer, and brackets rendering plus output readback for each group. render_into_camera is the immediate single-camera helper. update_scene_state is the once-per-physics-step dedupe gate that drives update_transforms/update_geometries -- when it early-outs you see the renderer do nothing, which is the expected behavior, not a gap. ===",
         "domain": "IsaacLab-RenderContext",
         "color": "0xFFC107",
         "module": "isaaclab.renderers.render_context",
         "functions": [
+            {"function": "RenderContext.render_pending_cameras", "color": "0xFFC107"},
             {"function": "RenderContext.render_into_camera", "color": "0xFFC107"},
             {"function": "RenderContext.update_scene_state", "color": "0xFFD54F"},
             {"function": "RenderContext.ensure_initialize", "color": "0xFFE082"},

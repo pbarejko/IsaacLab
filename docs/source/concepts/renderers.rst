@@ -398,7 +398,8 @@ The renderer system consists of:
 4. **SimulationContext** — Owns renderer instances in its backend registry and shares them across equal configurations
    of the same concrete type through ``get_or_create_backend(renderer_cfg)``.
 5. **RenderContext** — Coordinates initialization, stage preparation, scene updates, and material writers using
-   a filtered view of the simulation registry. It does not construct, cache, or close renderer instances.
+   a filtered view of the simulation registry, and groups camera captures for each renderer into one rendering
+   request. It does not construct, cache, or close renderer instances.
 
 .. code-block:: python
 
@@ -427,6 +428,51 @@ For the RTX renderer (requires Isaac Sim):
 
 For RTX renderer settings, see
 :doc:`/source/how-to/configure_rendering`.
+
+.. _renderer-camera-batching:
+
+Rendering multiple cameras
+--------------------------
+
+:meth:`~isaaclab.renderers.BaseRenderer.render` accepts a sequence of opaque render-data objects
+created by the same renderer. A single camera uses a one-element sequence:
+
+.. code-block:: python
+
+   renderer.render([camera_render_data])
+   renderer.render([wide_render_data, tele_render_data])
+
+Each backend controls how it executes the request. Camera poses and intrinsics must be updated
+for every requested camera before rendering starts; outputs are then read for each camera.
+
+Camera sensors use :class:`~isaaclab.renderers.RenderContext` to collect pending captures and
+submit them together to their shared renderer. With eager sensor updates
+(``scene.cfg.lazy_sensor_update=False``), pending captures are rendered at the end of
+``scene.update()``. With lazy sensor updates, reading a camera's ``data`` renders the pending,
+due cameras that share its renderer before returning the requested data. This captures the
+current simulation state without waiting for another physics step.
+
+.. note::
+
+   With lazy updates, reading one camera can also refresh another due camera whose output is
+   never read. This lets the renderer process their products together. Cameras with a different
+   renderer instance are submitted separately. Output buffers are reused, so reading a peer
+   camera can change tensor views retained from an earlier capture. Clone an output tensor
+   when retaining a snapshot across later captures.
+
+**Migrating renderer implementations and direct callers:** Change calls from
+``renderer.render(camera_render_data)`` to ``renderer.render([camera_render_data])``.
+Custom renderer overrides must accept a sequence and produce outputs for every entry. They may
+initially loop over the sequence if their backend has no shared submission mechanism.
+``create_render_data()``, ``update_camera()``, ``read_output()``, and ``cleanup()`` retain their
+per-camera interfaces. Camera-sensor users continue accessing ``camera.data`` as before.
+
+The optional :meth:`~isaaclab.renderers.BaseRenderer.invalidate_camera` hook receives one
+render-data object after an explicit camera pose or calibration change, or a reset. Its default
+implementation does nothing. Backends that reuse native frames, including frames shared with a
+visualizer, should override it to discard the cached frame so the next capture reflects the change
+even within the same physics step. Routine ``update_camera()`` calls prepare poses without
+invalidating an otherwise current native frame.
 
 Core concepts
 -------------

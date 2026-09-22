@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import logging
 import os
+import weakref
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 import torch
@@ -20,6 +23,7 @@ from .base_renderer import BaseRenderer, VisualMaterialBatch
 from .renderer_cfg import RendererCfg
 
 if TYPE_CHECKING:
+    from isaaclab.sensors.camera import Camera
     from isaaclab.sim import BackendCfg
 
 logger = logging.getLogger(__name__)
@@ -82,6 +86,8 @@ class RenderContext:
         "_visual_material_selections",
         "_visual_material_env_ids",
         "_consumers_finalized",
+        "_pending_cameras",
+        "_camera_render_deferrals",
     )
 
     def __init__(self, backend_registry: list[tuple[BackendCfg, Any]]) -> None:
@@ -100,6 +106,8 @@ class RenderContext:
         self._visual_material_selections: dict[tuple[str, tuple[int, ...]], tuple[torch.Tensor, wp.array]] = {}
         self._visual_material_env_ids: dict[tuple[torch.device, int], tuple[torch.Tensor, wp.array]] = {}
         self._consumers_finalized = False
+        self._pending_cameras: dict[int, weakref.ReferenceType[Camera]] = {}
+        self._camera_render_deferrals = 0
 
     @property
     def _renderer_entries(self) -> tuple[tuple[RendererCfg, BaseRenderer], ...]:
@@ -354,8 +362,84 @@ class RenderContext:
             print=True,
             synchronize=True,
         ):
-            renderer.render(render_data)
+            renderer.render([render_data])
         renderer.read_output(render_data, camera_data)
+
+    @property
+    def camera_renders_deferred(self) -> bool:
+        """Whether sensor updates are collecting requests for submission together."""
+        return self._camera_render_deferrals > 0
+
+    def queue_camera(self, camera: Camera) -> None:
+        """Queue a camera for capture, replacing any older request for that camera.
+
+        The camera retains ownership of its buffers and capture timing. Queuing does not
+        extend its lifetime, and an expired request is discarded before rendering.
+
+        Args:
+            camera: Camera whose next due capture should join its renderer's pending group.
+        """
+        self._pending_cameras[id(camera)] = weakref.ref(camera)
+
+    def remove_camera(self, camera: Camera) -> None:
+        """Remove a pending capture before releasing a camera's renderer resources.
+
+        Args:
+            camera: Camera whose pending request should be discarded.
+        """
+        self._pending_cameras.pop(id(camera), None)
+
+    @contextmanager
+    def defer_camera_renders(self, physics_step_count: int) -> Iterator[None]:
+        """Collect eager camera updates and submit them after a successful outermost scope.
+
+        Args:
+            physics_step_count: Current physics step for shared scene synchronization.
+        """
+        self._camera_render_deferrals += 1
+        try:
+            yield
+        finally:
+            self._camera_render_deferrals -= 1
+        if not self.camera_renders_deferred:
+            self.render_pending_cameras(physics_step_count)
+
+    def render_pending_cameras(self, physics_step_count: int, renderer: BaseRenderer | None = None) -> None:
+        """Capture queued, due cameras together for each shared renderer.
+
+        Prepare every requested camera before submission. Only commit camera timestamps
+        and frame counters after rendering and reading all outputs in a group succeeds.
+        Failed groups remain queued for retry.
+
+        Args:
+            physics_step_count: Current physics step for shared scene synchronization.
+            renderer: Limit submission to this renderer, or submit all queued groups.
+        """
+        groups: dict[int, tuple[BaseRenderer, list[Camera]]] = {}
+        for camera_id, reference in tuple(self._pending_cameras.items()):
+            camera = reference()
+            if camera is None or not camera.is_initialized or camera._renderer is None:
+                self._pending_cameras.pop(camera_id, None)
+            elif renderer is None or camera._renderer is renderer:
+                groups.setdefault(id(camera._renderer), (camera._renderer, []))[1].append(camera)
+
+        for backend, cameras in groups.values():
+            ready = []
+            for camera in cameras:
+                if camera._prepare_render():
+                    ready.append(camera)
+                else:
+                    self._pending_cameras.pop(id(camera), None)
+            if not ready:
+                continue
+            self.update_scene_state(physics_step_count)
+            with wp.ScopedTimer(RENDER_PROFILE_SCOPE, active=_RENDER_PROFILE_ENABLED, print=True, synchronize=True):
+                backend.render([camera._render_data for camera in ready])
+            for camera in ready:
+                backend.read_output(camera._render_data, camera._data)
+            for camera in ready:
+                camera._complete_render()
+                self._pending_cameras.pop(id(camera), None)
 
     def reset_stage_prepare_flag(self) -> None:
         """Allow :meth:`ensure_prepare_stage` to run ``prepare_stage`` again (e.g. a new USD stage)."""
@@ -380,6 +464,7 @@ class RenderContext:
                 logger.error("Error closing visual-material writer: %s", exc)
                 errors.append(exc)
         self.clone_contexts.clear()
+        self._pending_cameras.clear()
         self._prepared_renderer_ids.clear()
         self._prepared_num_envs = None
         self._last_scene_state_step = None

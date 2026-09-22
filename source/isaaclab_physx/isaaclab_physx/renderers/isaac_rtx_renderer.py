@@ -11,6 +11,7 @@ import json
 import logging
 import math
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, NoReturn
 
@@ -29,6 +30,7 @@ from isaaclab.utils.warp.kernels import reshape_tiled_image
 from isaaclab.utils.warp.warp_math import clamp_depth_to_inf_wp, replace_inf_depth_wp
 
 from .isaac_rtx_renderer_utils import (
+    _invalidate_isaac_rtx_render_update,
     apply_isaac_rtx_determinism_settings,
     apply_isaac_rtx_global_settings,
     ensure_isaac_rtx_render_update,
@@ -586,7 +588,7 @@ class IsaacRtxRenderer(BaseRenderer):
         positions: ProxyArray,
         orientations: ProxyArray,
         intrinsics: ProxyArray,
-    ):
+    ) -> None:
         """No-op for camera poses, which the frame view already writes into Fabric.
         See :meth:`~isaaclab.renderers.base_renderer.BaseRenderer.update_camera`."""
         pass
@@ -606,18 +608,28 @@ class IsaacRtxRenderer(BaseRenderer):
             device=parameters.device,
         )
 
-    def render(self, render_data: IsaacRtxRenderData):
-        """Extract data from annotators and write to output buffers.
-        See :meth:`~isaaclab.renderers.base_renderer.BaseRenderer.render`."""
-        spec = render_data.spec
-        output_data = render_data.output_data
-        if output_data is None or spec is None:
+    def invalidate_camera(self, render_data: IsaacRtxRenderData) -> None:
+        """Require a fresh RTX frame after an explicit camera change or reset."""
+        _invalidate_isaac_rtx_render_update()
+
+    def render(self, render_data: Sequence[IsaacRtxRenderData]) -> None:
+        """Update RTX once and extract each requested camera's annotators into its output buffers.
+
+        See :meth:`~isaaclab.renderers.base_renderer.BaseRenderer.render`.
+        """
+        cameras = [data for data in render_data if data.output_data is not None and data.spec is not None]
+        if not cameras:
             return
 
-        # Ensure the RTX renderer has been pumped so annotator buffers are fresh.
-        # This is a no-op if another camera instance already triggered the update
-        # for the current physics step, or if a visualizer already pumped it.
+        # A visualizer may already have pumped RTX for the current physics step.
         ensure_isaac_rtx_render_update()
+        for data in cameras:
+            self._extract_output(data)
+
+    def _extract_output(self, render_data: IsaacRtxRenderData) -> None:
+        """Copy one camera's annotators into its output buffers."""
+        spec = render_data.spec
+        output_data = render_data.output_data
 
         view_count = spec.view_count
         cfg = spec.cfg

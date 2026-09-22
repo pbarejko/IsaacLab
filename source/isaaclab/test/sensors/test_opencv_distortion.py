@@ -196,6 +196,8 @@ def _camera_for_prims(prims, width=640, height=480, device="cpu"):
     fake._frame = ProxyArray(wp.zeros(len(prims), dtype=wp.int64, device=device))
     fake._ALL_INDICES = wp.array(np.arange(len(prims)), dtype=wp.int32, device=device)
     fake._ALL_ENV_MASK = wp.ones(len(prims), dtype=wp.bool, device=device)
+    fake._is_outdated = wp.zeros(len(prims), dtype=wp.bool, device=device)
+    fake._data_generation = 0
     # attributes touched by ``__del__``/``_clear_callbacks`` when the fake object is garbage collected
     fake._initialize_handle = None
     fake._invalidate_initialize_handle = None
@@ -204,6 +206,7 @@ def _camera_for_prims(prims, width=640, height=480, device="cpu"):
     fake._render_data = SimpleNamespace(parameters=None)
     fake._renderer = SimpleNamespace(
         update_camera_intrinsics=lambda data, _matrices, parameters: setattr(data, "parameters", wp.clone(parameters)),
+        invalidate_camera=lambda _data: None,
         cleanup=lambda _data: None,
     )
     with (

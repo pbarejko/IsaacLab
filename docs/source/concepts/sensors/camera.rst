@@ -340,6 +340,9 @@ cost of the de-tiled outputs or downstream vision models. The camera follows the
 ``update_period`` contract; choose a period that matches the observation cadence instead of rendering
 at every physics step by default.
 
+Pending captures from due camera sensors that share a renderer are submitted together. With lazy sensor updates,
+reading one camera can also render other pending cameras; see :ref:`renderer-camera-batching`.
+
 A runnable camera example is available in ``scripts/demos/sensors/cameras.py``:
 
 .. code-block:: bash

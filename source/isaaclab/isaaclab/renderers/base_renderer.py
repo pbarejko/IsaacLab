@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -175,8 +176,24 @@ class BaseRenderer(ABC):
         raise NotImplementedError(f"{type(self).__name__} does not support runtime camera calibration.")
 
     @abstractmethod
-    def render(self, render_data: Any) -> None:
-        """Perform rendering and write to output buffers.
+    def render(self, render_data: Sequence[Any]) -> None:
+        """Render a collection of cameras into their bound output buffers.
+
+        All camera poses and shared scene state must be prepared before calling this method.
+        An empty sequence is a no-op. Each object must belong to this renderer and appear once.
+        Implementations may submit the collection together or render its cameras sequentially.
+
+        Args:
+            render_data: Renderer-specific objects from :meth:`create_render_data`.
+                Pass a one-element sequence to render a single camera.
+        """
+        pass
+
+    def invalidate_camera(self, render_data: Any) -> None:
+        """Invalidate a cached native frame after explicit camera changes or reset.
+
+        Backends that always render fresh frames need no additional work. Backends sharing
+        a native frame with a visualizer must ensure it reflects the changed camera.
 
         Args:
             render_data: The render data object from :meth:`create_render_data`.

@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import logging
 from collections.abc import Sequence
+from contextlib import nullcontext
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -525,8 +526,14 @@ class InteractiveScene:
         for surface_gripper in self._surface_grippers.values():
             surface_gripper.update(dt)
         # -- sensors
-        for sensor in self._sensors.values():
-            sensor.update(dt, force_recompute=not self.cfg.lazy_sensor_update)
+        render_scope = (
+            nullcontext()
+            if self.cfg.lazy_sensor_update
+            else self.sim.render_context.defer_camera_renders(self.sim.get_physics_step_count())
+        )
+        with render_scope:
+            for sensor in self._sensors.values():
+                sensor.update(dt, force_recompute=not self.cfg.lazy_sensor_update)
 
     """
     Operations: Scene State.

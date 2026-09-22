@@ -406,6 +406,10 @@ class SensorBase(ABC):
         if not force_recompute and self._data_generation == self._data_generation_last_update:
             return
         self._update_buffers_impl(self._is_outdated)
+        self._mark_buffers_updated()
+
+    def _mark_buffers_updated(self) -> None:
+        """Commit capture timestamps after the sensor's output buffers have been filled."""
         # update timestamps and clear outdated flags
         wp.launch(
             update_outdated_envs_kernel,

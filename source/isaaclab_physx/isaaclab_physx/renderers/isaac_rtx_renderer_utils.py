@@ -182,6 +182,13 @@ def ensure_rtx_hydra_engine_attached() -> None:
         logger.error("RTX Hydra engine attach failed: %s", e)
 
 
+def _invalidate_isaac_rtx_render_update() -> None:
+    """Require a fresh Kit update after an explicit camera change, including within a step."""
+    global _last_render_update_key
+    # Also bypass the visualizer shortcut: it may have pumped before the camera changed.
+    _last_render_update_key = (0, -1, -1)
+
+
 def ensure_isaac_rtx_render_update(force: bool = False) -> None:
     """Ensure the Isaac RTX renderer has been pumped for the current sim step.
 
@@ -194,14 +201,16 @@ def ensure_isaac_rtx_render_update(force: bool = False) -> None:
             on-demand headless offscreen video path to produce a frame only when one is
             requested. Defaults to ``False``.
 
-    Safe to call from multiple ``Camera`` instances per step —
-    only the first call triggers ``app.update()``.  Subsequent calls are no-ops
+    Safe to call repeatedly per step — only the first call triggers ``app.update()``
+    unless camera state has since been explicitly invalidated. Subsequent calls are no-ops
     because the module-level ``_last_render_update_key`` already matches the
     current ``(id(sim), step_count, render_generation)`` tuple.
 
     The key is a ``(sim_instance_id, step_count, render_generation)`` tuple so that:
     - creating a new ``SimulationContext`` invalidates stale stamps, and
     - render/reset transitions that do not advance physics step count still force a fresh update.
+    Explicitly changing camera poses or intrinsics invalidates the stamp so subsequent captures
+    observe those changes even without a physics step or visualizer update.
 
     After the initial ``app.update()`` the streaming subsystem is queried
     synchronously via ``UsdContext.get_stage_streaming_status()``.  If textures
@@ -209,8 +218,8 @@ def ensure_isaac_rtx_render_update(force: bool = False) -> None:
     subsystem reports idle (or a timeout is reached).
 
     No-op conditions:
-        * Already called this step (dedup across camera instances).
-        * A visualizer already pumps ``app.update()`` (e.g. KitVisualizer).
+        * Already called this step and no camera state has changed.
+        * A visualizer already pumps ``app.update()`` and no camera state has changed.
         * Rendering is not active and ``force`` is ``False``.
     """
     global _last_render_update_key
@@ -228,6 +237,7 @@ def ensure_isaac_rtx_render_update(force: bool = False) -> None:
     # However, on the very first call for a new SimulationContext, the visualizer
     # has not had a chance to pump yet (sim.render() was never called), so we
     # must perform the initial app.update() ourselves to populate annotator buffers.
+    # Camera updates clear the stamp too, since the visualizer's frame predates them.
     first_call_for_sim = _last_render_update_key[0] != id(sim)
     if not first_call_for_sim and any(viz.pumps_app_update() for viz in sim.visualizers):
         _last_render_update_key = key

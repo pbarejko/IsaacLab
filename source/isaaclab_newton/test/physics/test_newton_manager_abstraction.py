@@ -33,6 +33,7 @@ import sys
 import textwrap
 from inspect import signature
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 import isaaclab_newton.physics.newton_manager as newton_manager_module
 import numpy as np
@@ -420,9 +421,52 @@ def test_newton_warp_renderer_marks_triangle_mesh_refit_as_eager(
     renderer._newton_model = SimpleNamespace(tri_indices=tri_indices)
     render_data = SimpleNamespace(sensor_task_name=None, ppisp_pipeline=None)
 
-    renderer.render(render_data)
+    renderer.render([render_data])
 
     assert registration["graph_capturable"] is expected_graph_capturable
+
+
+@pytest.mark.parametrize("camera_count", [0, 2])
+def test_newton_warp_renderer_submits_all_cameras_together(monkeypatch, camera_count):
+    """Each submission launches every requested camera and then its own ISP pipeline."""
+    from isaaclab_newton.renderers.newton_warp_renderer import NewtonWarpRenderer
+
+    tasks = {}
+    launches = []
+    submissions = []
+
+    def register_task(cls, name, update_fn, *, graph_capturable=True):
+        assert name not in tasks
+        tasks[name] = update_fn
+
+    def update_tasks(cls, *names):
+        assert len(tasks) == camera_count
+        submissions.append(names)
+        for name in names:
+            tasks[name]()
+
+    monkeypatch.setattr(NewtonManager, "_register_sensor_task", classmethod(register_task))
+    monkeypatch.setattr(NewtonManager, "_update_sensor_tasks", classmethod(update_tasks))
+    renderer = object.__new__(NewtonWarpRenderer)
+    renderer._newton_model = SimpleNamespace(tri_indices=None)
+    renderer._launch_render = launches.append
+    cameras = [
+        SimpleNamespace(
+            sensor_task_name=None,
+            ppisp_pipeline=Mock(),
+            _ppisp_hdr_source=object(),
+            _ppisp_rgba_dest=object(),
+        )
+        for _ in range(camera_count)
+    ]
+
+    for frame in range(2):
+        renderer.render(cameras)
+        assert launches == cameras * (frame + 1)
+        assert len(submissions) == (frame + 1 if camera_count else 0)
+        for camera in cameras:
+            camera.ppisp_pipeline.apply.assert_called_with(camera._ppisp_hdr_source, camera._ppisp_rgba_dest)
+            assert camera.ppisp_pipeline.apply.call_count == frame + 1
 
 
 def test_sensor_bvh_shape_flags_are_fixed_before_builder_creation(monkeypatch):

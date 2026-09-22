@@ -468,10 +468,85 @@ def test_render_treats_empty_annotator_frame_as_not_ready(monkeypatch, data_type
         patch.object(rtx_renderer, "ensure_isaac_rtx_render_update"),
         patch.object(rtx_renderer.wp, "launch") as launch,
     ):
-        renderer.render(render_data)
+        renderer.render([render_data])
 
     output_buffer.zero_.assert_called_once_with()
     launch.assert_not_called()
+
+
+@pytest.mark.parametrize("camera_count", [0, 2])
+def test_render_updates_once_and_writes_each_camera_output(monkeypatch, camera_count):
+    """A render submission pumps RTX once and copies each annotator into its own output."""
+    _install_omni_stubs(monkeypatch)
+    import isaaclab_physx.renderers.isaac_rtx_renderer as rtx_renderer
+    from isaaclab_physx.renderers.isaac_rtx_renderer_cfg import IsaacRtxRendererCfg
+
+    renderer = rtx_renderer.IsaacRtxRenderer.__new__(rtx_renderer.IsaacRtxRenderer)
+    renderer.cfg = IsaacRtxRendererCfg()
+    cameras = []
+    frames = []
+    for index in range(camera_count):
+        frame = np.full((2, 3, 4), index + 1, dtype=np.uint8)
+        frames.append(frame)
+        cameras.append(
+            SimpleNamespace(
+                annotators={"rgba": MagicMock(get_data=MagicMock(return_value=frame))},
+                output_data={"rgba": SimpleNamespace(warp=wp.zeros((1, 2, 3, 4), dtype=wp.uint8, device="cpu"))},
+                spec=SimpleNamespace(view_count=1, device="cpu", cfg=SimpleNamespace(width=3, height=2)),
+                renderer_info={},
+                ppisp_pipeline=None,
+                _hdr_scratch_wp=None,
+            )
+        )
+
+    with patch.object(rtx_renderer, "ensure_isaac_rtx_render_update") as update:
+        renderer.render(cameras)
+
+    assert update.call_count == bool(camera_count)
+    for camera, frame in zip(cameras, frames):
+        np.testing.assert_array_equal(camera.output_data["rgba"].warp.numpy()[0], frame)
+
+
+@pytest.mark.parametrize("with_visualizer", [False, True])
+def test_explicit_camera_invalidation_requires_fresh_rtx_frame(monkeypatch, with_visualizer):
+    """Ordinary preparation preserves deduplication; explicit camera changes require one fresh frame."""
+    _install_omni_stubs(monkeypatch)
+    import isaaclab_physx.renderers.isaac_rtx_renderer as rtx_renderer
+    import isaaclab_physx.renderers.isaac_rtx_renderer_utils as rtx_utils
+
+    kit = MagicMock()
+    monkeypatch.setitem(sys.modules, "omni.kit", kit)
+    monkeypatch.setitem(sys.modules, "omni.kit.app", kit.app)
+    monkeypatch.setattr(sys.modules["omni"], "kit", kit, raising=False)
+    app = kit.app.get_app.return_value
+    visualizer = MagicMock()
+    visualizer.pumps_app_update.return_value = True
+    sim = SimpleNamespace(
+        _physics_step_count=0,
+        render_generation=0,
+        is_rendering=True,
+        visualizers=[visualizer] if with_visualizer else [],
+        physics_manager=MagicMock(),
+        set_setting=MagicMock(),
+    )
+    monkeypatch.setattr(rtx_utils, "sim_utils", SimpleNamespace(SimulationContext=MagicMock(instance=lambda: sim)))
+    monkeypatch.setattr(rtx_utils, "_last_render_update_key", (0, -1, -1))
+    monkeypatch.setattr(rtx_utils, "_get_stage_streaming_busy", lambda: False)
+    renderer = rtx_renderer.IsaacRtxRenderer.__new__(rtx_renderer.IsaacRtxRenderer)
+
+    rtx_utils.ensure_isaac_rtx_render_update()
+    app.update.assert_called_once()
+    renderer.update_camera(None, None, None, None)
+    rtx_utils.ensure_isaac_rtx_render_update()
+    app.update.assert_called_once()
+
+    # Explicit invalidations from several cameras still coalesce into one update.
+    renderer.invalidate_camera(None)
+    renderer.invalidate_camera(None)
+    rtx_utils.ensure_isaac_rtx_render_update()
+    assert app.update.call_count == 2
+    rtx_utils.ensure_isaac_rtx_render_update()
+    assert app.update.call_count == 2
 
 
 def test_isaac_rtx_read_output_clears_stale_metadata_and_keeps_seeded_keys(monkeypatch):
