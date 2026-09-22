@@ -104,6 +104,9 @@ class CameraCfg(SensorBaseCfg):
     If True, the latest camera pose is updated in the camera's data which will slow down performance
     due to the use of :class:`FrameView`.
     If False, the pose of the camera during initialization is returned.
+
+    Renderers that receive explicit camera poses also use this cached pose for rendering. Set this
+    to True for cameras attached to moving bodies so their rendered views follow the bodies.
     """
 
     semantic_filter: str | list[str] = "*:*"

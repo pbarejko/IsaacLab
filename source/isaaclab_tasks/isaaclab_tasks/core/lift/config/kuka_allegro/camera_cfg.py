@@ -44,6 +44,7 @@ BASE_CAMERA_CFG = CameraCfg(
 
 WRIST_CAMERA_CFG = CameraCfg(
     prim_path="{ENV_REGEX_NS}/Robot/ee_link/palm_link/Camera",
+    update_latest_camera_pose=True,
     offset=CameraCfg.OffsetCfg(
         pos=(0.038, -0.38, -0.18),
         rot=(0.641, 0.641, -0.299, 0.299),

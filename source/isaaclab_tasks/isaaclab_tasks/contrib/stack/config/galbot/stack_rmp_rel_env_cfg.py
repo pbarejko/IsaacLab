@@ -171,6 +171,7 @@ class RmpFlowGalbotLeftArmCubeStackVisuomotorEnvCfg(RmpFlowGalbotLeftArmCubeStac
         # Set left and right wrist cameras for VLA policy training
         self.scene.right_wrist_cam = CameraCfg(
             prim_path="{ENV_REGEX_NS}/Robot/right_arm_camera_sim_view_frame/right_camera",
+            update_latest_camera_pose=True,
             update_period=0.0333,
             height=256,
             width=256,
@@ -184,6 +185,7 @@ class RmpFlowGalbotLeftArmCubeStackVisuomotorEnvCfg(RmpFlowGalbotLeftArmCubeStac
 
         self.scene.left_wrist_cam = CameraCfg(
             prim_path="{ENV_REGEX_NS}/Robot/left_arm_camera_sim_view_frame/left_camera",
+            update_latest_camera_pose=True,
             update_period=0.0333,
             height=256,
             width=256,
@@ -198,6 +200,7 @@ class RmpFlowGalbotLeftArmCubeStackVisuomotorEnvCfg(RmpFlowGalbotLeftArmCubeStac
         # Set ego view camera
         self.scene.ego_cam = CameraCfg(
             prim_path="{ENV_REGEX_NS}/Robot/head_camera_sim_view_frame/head_camera",
+            update_latest_camera_pose=True,
             update_period=0.0333,
             height=256,
             width=256,
