@@ -27,6 +27,7 @@ import re
 import sys
 import weakref
 from collections.abc import Iterator, Sequence
+from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, NoReturn, cast
 
@@ -921,6 +922,20 @@ class OVRTXRenderer(BaseRenderer):
         Performs OVRTX initialization (stage export, USD load, bindings) on first call,
         matching the interface of Isaac RTX and Newton Warp which need no separate initialize().
         """
+        # Newton authors only the source camera in USD; OVRTX clones it for every environment.
+        # Bind later cameras and calibration writes to the same paths as the initial camera.
+        if (
+            len(spec.camera_prim_paths) == 1
+            and spec.num_instances > 1
+            and spec.camera_path_relative_to_env_0
+            and spec.camera_prim_paths[0] == f"/World/envs/env_0/{spec.camera_path_relative_to_env_0}"
+        ):
+            spec = replace(
+                spec,
+                camera_prim_paths=tuple(
+                    f"/World/envs/env_{i}/{spec.camera_path_relative_to_env_0}" for i in range(spec.num_instances)
+                ),
+            )
         # Normalize aliases such as "cuda" before comparing cameras sharing this renderer.
         warp_device = wp.get_device(spec.device)
         if self._initialized_scene and str(warp_device) != self._device:

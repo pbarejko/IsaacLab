@@ -249,7 +249,8 @@ def test_ovrtx_render_empty_sequence_does_not_require_initialized_backend():
 @pytest.mark.integration
 @pytest.mark.rendering
 @pytest.mark.parametrize("use_ovstage", [False, True])
-def test_ovrtx_multiple_cameras_render_independent_views(monkeypatch, use_ovstage, tmp_path):
+@pytest.mark.parametrize("source_only", [False, True])
+def test_ovrtx_multiple_cameras_render_independent_views(monkeypatch, use_ovstage, source_only, tmp_path):
     """Check independent camera batches and save RGB/depth frames under pytest's temporary directory.
 
     Use ``--basetemp=/tmp/ovrtx-camera-frames`` to choose where pytest writes the captures.
@@ -337,7 +338,7 @@ def test_ovrtx_multiple_cameras_render_independent_views(monkeypatch, use_ovstag
                 cfg=cfg,
                 device="cuda:0",
                 num_instances=2,
-                camera_prim_paths=tuple(f"/World/envs/env_{i}/cam{index}" for i in range(2)),
+                camera_prim_paths=tuple(f"/World/envs/env_{i}/cam{index}" for i in range(1 if source_only else 2)),
                 view_count=2,
                 camera_path_relative_to_env_0=f"cam{index}",
             )
@@ -352,6 +353,13 @@ def test_ovrtx_multiple_cameras_render_independent_views(monkeypatch, use_ovstag
             )
             renderer.set_outputs(rd, data.output)
             cameras.append((rd, data))
+            # Calibration writes must also cover clones absent from the authored USD.
+            parameters = wp.array(
+                [[24.0, 24.0], [20.0, 20.0], [20.0, 20.0], [0.0, 0.0], [0.0, 0.0]],
+                dtype=wp.float32,
+                device="cuda:0",
+            )
+            renderer.update_camera_intrinsics(rd, wp.zeros(2, dtype=wp.mat33f, device="cuda:0"), parameters)
             # Register the next camera after rendering has already started.
             renderer.render([rd])
             check_depth(rd, data, 5.0 - index - 0.5, f"initial_cam{index}")
@@ -871,8 +879,11 @@ def test_ovrtx_cleanup_without_render_data_keeps_renderer_state():
 
 
 @pytest.mark.parametrize("use_ovstage", [False, True])
-def test_intrinsic_updates_target_the_given_camera(monkeypatch, use_ovstage):
-    """Cameras sharing a renderer must bind and update distinct native camera paths."""
+@pytest.mark.parametrize("source_only", [False, True])
+def test_intrinsic_updates_target_the_given_camera(monkeypatch, use_ovstage, source_only):
+    """Bindings target every logical camera, including clones absent from the source USD."""
+    from isaaclab.renderers.camera_render_spec import CameraRenderSpec
+
     renderer = _make_ovrtx_renderer_without_backend()
     renderer._initialized_scene = True
     renderer._device = "cpu"
@@ -888,15 +899,16 @@ def test_intrinsic_updates_target_the_given_camera(monkeypatch, use_ovstage):
     renderer.backend.stage.query_from_path_list.side_effect = lambda paths: contextlib.nullcontext(object())
     for name in ("add_usd_reference_from_string", "apply_usd_changes", "remove_usd"):
         monkeypatch.setattr(ovrtx_renderer_module.ovstage.population, name, MagicMock())
-    paths = [[f"/World/envs/env_{i}/{name}" for i in range(2)] for name in ("CameraA", "CameraB")]
+    paths = [[f"/World/envs/env_{i}/{name}" for i in range(2)] for name in ("CameraA", "Robot/wrist/CameraB")]
     cameras = [
         renderer.create_render_data(
-            types.SimpleNamespace(
+            CameraRenderSpec(
                 cfg=_make_camera_cfg(["depth"]),
                 device="cpu",
                 num_instances=2,
-                camera_prim_paths=camera_paths,
-                camera_path_relative_to_env_0=camera_paths[0].rsplit("/", 1)[1],
+                camera_prim_paths=tuple(camera_paths[:1] if source_only else camera_paths),
+                view_count=2,
+                camera_path_relative_to_env_0=camera_paths[0].removeprefix("/World/envs/env_0/"),
             )
         )
         for camera_paths in paths
